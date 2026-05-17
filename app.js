@@ -5,6 +5,7 @@ const screens = {
     test: document.getElementById('screen-test'),
     pvt: document.getElementById('screen-pvt'),
     aim: document.getElementById('screen-aim'),
+    stroop: document.getElementById('screen-stroop'),
     result: document.getElementById('screen-result'),
     chart: document.getElementById('screen-chart'),
     leaderboard: document.getElementById('screen-leaderboard')
@@ -33,6 +34,7 @@ const historyList = document.getElementById('history-list');
 const btnSelectCps = document.getElementById('btn-select-cps');
 const btnSelectPvt = document.getElementById('btn-select-pvt');
 const btnSelectAim = document.getElementById('btn-select-aim');
+const btnSelectStroop = document.getElementById('btn-select-stroop');
 const dashboardTestTitle = document.getElementById('dashboard-test-title');
 const dashboardInstruction = document.getElementById('dashboard-instruction');
 
@@ -65,6 +67,7 @@ const stroopWord = document.getElementById('stroop-word');
 const stroopButtons = document.getElementById('stroop-buttons');
 
 // Result Elements
+const resultScoreSection = document.getElementById('result-score-section');
 const resultScoreValue = document.getElementById('result-score-value');
 const resultScoreUnit = document.getElementById('result-score-unit');
 const resultFatigueStatus = document.getElementById('result-fatigue-status');
@@ -245,7 +248,7 @@ function setupEventListeners() {
                     await fetch(JSONBLOB_URL, {
                         method: 'PUT',
                         headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
-                        body: JSON.stringify({"name": "cns_tracker", "data": {cps:[], pvt:[], aim:[]}})
+                        body: JSON.stringify({"name": "cns_tracker", "data": {cps:[], pvt:[], aim:[], stroop:[]}})
                     });
                     alert("Başarıyla Sıfırlandı!");
                     btnAdminReset.textContent = "Tüm Tabloyu Sıfırla (Admin)";
@@ -817,7 +820,8 @@ async function syncLeaderboard(score, type, username) {
         const json = await res.json();
         const data = json.data;
         
-        if (!data.aim) data.aim = []; // Ensure aim exists
+        if (!data.aim) data.aim = [];
+        if (!data.stroop) data.stroop = [];
         
         const i = data[type].findIndex(u => u.username === username);
         let updated = false;
