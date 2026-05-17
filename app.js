@@ -401,13 +401,13 @@ function processResult(score, type) {
         const ratio = score / baseline;
         if (ratio >= 0.95) {
             statusClass = 'good'; statusText = 'Harika Durumda! 🟢';
-            recText = 'Merkezi sinir sistemin tamamen dinlenmiş durumda. Bugün ağır antrenman yapabilir, PR deneyebilirsin.';
+            recText = 'Merkezi sinir sistemin tamamen dinlenmiş ve tepki sürelerin çok yüksek. Maksimum sinirsel aktivasyon sağlanıyor.';
         } else if (ratio >= 0.85) {
             statusClass = 'normal'; statusText = 'Normal Seviyede 🟡';
-            recText = 'Sistemin standart çalışıyor. Normal hipertrofi/güç antrenman programını eksiksiz uygulayabilirsin.';
+            recText = 'Merkezi sinir sistemin olağan durumunda. Herhangi bir yorgunluk veya belirgin yavaşlama belirtisi yok.';
         } else {
             statusClass = 'fatigued'; statusText = 'Yorgun Tespit Edildi 🔴';
-            recText = 'Sinir sistemin henüz toparlanmamış. Ağırlıkları %15-20 düşürmeli veya bugün aktif dinlenme yapmalısın.';
+            recText = 'Merkezi sinir sisteminde yavaşlama tespit edildi. Motor nöron uyarımında gecikmeler yaşanıyor, CNS yorgun.';
         }
         resultScoreValue.textContent = score.toFixed(1);
         resultScoreUnit.textContent = 'CPS';
@@ -415,13 +415,13 @@ function processResult(score, type) {
         // PVT
         if (score <= 250) {
             statusClass = 'good'; statusText = 'Kusursuz Reaksiyon! 🟢';
-            recText = 'Motor nöron ateşlemelerin zirvede. Bugün maksimum ağırlıklara (1RM) girmek için mükemmel bir gün.';
+            recText = 'Motor nöron ateşlemelerin zirvede. Uyaranlara verdiğin tepki süresi kusursuz ve çok hızlı.';
         } else if (score <= 350) {
             statusClass = 'normal'; statusText = 'Normal Reaksiyon 🟡';
-            recText = 'Sistemin uyanık ve sağlıklı. Planladığın standart antrenmanı yapabilirsin.';
+            recText = 'Sistemin uyanık ve sağlıklı. Reaksiyon sürelerin standart sınırlar içerisinde.';
         } else {
             statusClass = 'fatigued'; statusText = 'CNS BİTKİN! 🔴';
-            recText = 'Motor nöron ateşlemesi gecikiyor (Lapse). Kesinlikle ağır kiloya girme! Sadece çok hafif kan pompalama veya tam dinlenme.';
+            recText = 'Motor nöron ateşlemesi gecikiyor (Lapse). Merkezi sinir sistemin bitkin durumda ve tepki sürelerin çok uzamış.';
         }
         resultScoreValue.textContent = Math.round(score);
         resultScoreUnit.textContent = 'MS';
