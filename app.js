@@ -492,13 +492,13 @@ function processResult(score, type) {
     } else if (type === 'aim') {
         if (score <= 500) {
             statusClass = 'good'; statusText = 'El-Göz Koordinasyonu Zirvede 🟢';
-            recText = 'Motor becerilerin kusursuz işliyor. Hem çok hızlı hem de isabetlisin. Ağır antrenmana tamamen hazırsın.';
+            recText = 'Motor becerilerin kusursuz işliyor. Hem çok hızlı hem de isabetlisin. Merkezi sinir sistemi ateşlemesi ve koordinasyonu en üst düzeyde.';
         } else if (score <= 700) {
             statusClass = 'normal'; statusText = 'Normal Koordinasyon 🟡';
-            recText = 'İsabet ve hız dengen standart sınırlar içerisinde. İnce motor becerilerin günlük düzeyde.';
+            recText = 'İsabet ve hız dengen standart sınırlar içerisinde. İnce motor becerilerin ve sinir iletimi normal seviyede çalışıyor.';
         } else {
             statusClass = 'fatigued'; statusText = 'Odak Kaybı / Titreme 🔴';
-            recText = 'İsabet oranın düşük veya tepkilerin çok yavaş (Tremor/Odak kaybı). Sinir sistemin bitkin, motor becerilerin zayıflamış.';
+            recText = 'İsabet oranın düşük veya tepkilerin çok yavaş (Tremor/Odak kaybı). Sinir sistemin bitkin, motor becerilerin ve nöral iletim zayıflamış.';
         }
         resultScoreValue.textContent = Math.round(score);
         resultScoreUnit.textContent = 'Puan';

@@ -28,6 +28,20 @@ B) Skor, Hedefin %85'i ile %95'i Arasındaysa:
    Başlık: Normal Seviyede 🟡
    Metin:  Merkezi sinir sistemin olağan durumunda. Herhangi bir yorgunluk veya belirgin yavaşlama belirtisi yok.
 
-C) Skor, Hedefin %85'inin Altındaysa:
+C) Normalden Oldukça Düşükse (CNS Yorgun):
    Başlık: Yorgun Tespit Edildi 🔴
    Metin:  Merkezi sinir sisteminde yavaşlama tespit edildi. Motor nöron uyarımında gecikmeler yaşanıyor, CNS yorgun.
+
+3. AIM (Hedef Vurma) Testi Sonuçları
+-----------------------------------------
+A) Skor <= 500 (Hızlı ve İsabetli):
+   Başlık: El-Göz Koordinasyonu Zirvede 🟢
+   Metin:  Motor becerilerin kusursuz işliyor. Hem çok hızlı hem de isabetlisin. Merkezi sinir sistemi ateşlemesi ve koordinasyonu en üst düzeyde.
+
+B) Skor 500 - 700 Arası:
+   Başlık: Normal Koordinasyon 🟡
+   Metin:  İsabet ve hız dengen standart sınırlar içerisinde. İnce motor becerilerin ve sinir iletimi normal seviyede çalışıyor.
+
+C) Skor > 700 (İsabetsiz veya Çok Yavaş):
+   Başlık: Odak Kaybı / Titreme 🔴
+   Metin:  İsabet oranın düşük veya tepkilerin çok yavaş (Tremor/Odak kaybı). Sinir sistemin bitkin, motor becerilerin ve nöral iletim zayıflamış.
