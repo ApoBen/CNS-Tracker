@@ -531,23 +531,44 @@ function processResult(score, type) {
         resultScoreValue.textContent = Math.round(score);
         resultScoreUnit.textContent = 'MS';
     } else if (type === 'aim') {
-        if (score >= 3000) {
+        const avgTime = aimState.times.reduce((a,b) => a+b, 0) / aimState.times.length || 1;
+        const accuracy = aimState.totalTargets > 0 ? (aimState.targetsHit / aimState.totalTargets) : 1;
+        const speedScore = (10000 / Math.max(avgTime, 50)) * 100;
+        
+        const lossSpeed = Math.max(0, 3500 - speedScore);
+        const lossAcc = speedScore * (1 - accuracy);
+        const lossBombs = aimState.bombsHit * 500;
+        const totalLoss = lossSpeed + lossAcc + lossBombs;
+
+        let causeText = "";
+        if (totalLoss > 0 && score < 2500) {
+            let pSpeed = Math.round((lossSpeed / totalLoss) * 100);
+            let pAcc = Math.round((lossAcc / totalLoss) * 100);
+            let pBomb = Math.round((lossBombs / totalLoss) * 100);
+            
+            causeText = `<br><br><strong style="color:var(--danger)">Performans Düşüş Nedeni:</strong><br>`;
+            if (pSpeed > 0) causeText += `• %${pSpeed} Reaksiyon Yavaşlığı (CNS Gecikmesi)<br>`;
+            if (pAcc > 0) causeText += `• %${pAcc} İsabet Düşüklüğü (Tremor/Odak Kaybı)<br>`;
+            if (pBomb > 0) causeText += `• %${pBomb} Dürtü Kontrolü Hatası (Bombalar)`;
+        }
+
+        if (score >= 2500) {
             statusClass = 'good'; statusText = 'El-Göz Koordinasyonu Zirvede 🟢';
             recText = 'Motor becerilerin kusursuz işliyor. Hem çok hızlı hem de isabetlisin. Merkezi sinir sistemi ateşlemesi ve koordinasyonu en üst düzeyde.';
-        } else if (score >= 2000) {
+        } else if (score >= 1500) {
             statusClass = 'normal'; statusText = 'Normal Koordinasyon 🟡';
-            recText = 'İsabet ve hız dengen standart sınırlar içerisinde. İnce motor becerilerin ve sinir iletimi normal seviyede çalışıyor.';
+            recText = 'İsabet ve hız dengen standart sınırlar içerisinde. İnce motor becerilerin ve sinir iletimi normal seviyede çalışıyor.' + causeText;
         } else {
             statusClass = 'fatigued'; statusText = 'Odak Kaybı / Titreme 🔴';
-            recText = 'İsabet oranın düşük veya tepkilerin çok yavaş (Tremor/Odak kaybı). Sinir sistemin bitkin, motor becerilerin ve nöral iletim zayıflamış.';
+            recText = 'Sistemde belirgin bir yavaşlama veya isabet sorunu var. Sinir sistemin bitkin, motor becerilerin ve nöral iletim zayıflamış.' + causeText;
         }
         resultScoreValue.textContent = Math.round(score);
         resultScoreUnit.textContent = 'Puan';
     }
 
-    resultFatigueStatus.className = `status-title ${statusClass}`;
+    resultScoreSection.className = `result-score score-${statusClass}`;
     resultFatigueStatus.textContent = statusText;
-    resultRecommendation.textContent = recText;
+    resultRecommendation.innerHTML = recText;
 
     appState.history.unshift({ date: new Date().toISOString(), type, score, status: statusClass, proMode: type === 'aim' ? aimState.proMode : false });
     saveState();
@@ -572,7 +593,7 @@ function updateDashboard() {
         statBaseline.textContent = '< 300';
         statLast.textContent = history.length > 0 ? Math.round(history[0].score) : '--';
     } else if (type === 'aim') {
-        statBaseline.textContent = '> 3000';
+        statBaseline.textContent = '> 2500';
         statLast.textContent = history.length > 0 ? Math.round(history[0].score) : '--';
     }
 
@@ -730,10 +751,10 @@ async function fetchAndRenderLeaderboard(type) {
             if (type === 'cps') valStr = `${item.score.toFixed(1)} CPS`;
             else if (type === 'pvt') valStr = `${Math.round(item.score)} ms`;
             
-            // Aim colors: <500 good, >700 bad
+            // Aim colors: >=2500 good, <1500 bad
             let scoreClass = '';
             if (type === 'pvt') scoreClass = item.score > 400 ? 'score-fatigued' : (item.score <= 300 ? 'score-good' : '');
-            else if (type === 'aim') scoreClass = item.score < 2000 ? 'score-fatigued' : (item.score >= 3000 ? 'score-good' : '');
+            else if (type === 'aim') scoreClass = item.score < 1500 ? 'score-fatigued' : (item.score >= 2500 ? 'score-good' : '');
             
             li.innerHTML = `
                 <div style="display:flex; align-items:center; gap: 10px;">
