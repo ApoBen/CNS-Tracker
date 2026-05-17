@@ -125,11 +125,14 @@
         </section>
 
         <section id="screen-aim" class="screen hidden">
-            <div class="test-header text-center glass-card" style="margin-bottom: 20px; padding: 15px; position:relative;">
-                <label style="position:absolute; top:15px; right:15px; display:flex; align-items:center; gap:5px; font-size:0.9rem; cursor:pointer; color:var(--danger); font-weight:bold;">
-                    <input type="checkbox" id="aim-pro-mode" style="width:16px; height:16px; accent-color:var(--danger);"> PRO MOD
-                </label>
-                <h2 id="aim-title" style="margin: 0 0 10px 0;">Hedef Vurma</h2>
+            <div class="test-header text-center glass-card" style="margin-bottom: 20px; padding: 15px;">
+                <div style="display:flex; flex-direction:column; align-items:center; gap:10px; margin-bottom: 15px;">
+                    <h2 id="aim-title" style="margin: 0;">Hedef Vurma</h2>
+                    <label style="display:inline-flex; align-items:center; gap:8px; font-size:1rem; cursor:pointer; color:var(--danger); background: rgba(239,68,68,0.15); padding: 6px 12px; border-radius: 8px; border: 1px solid var(--danger); font-weight:bold; box-shadow: 0 0 10px rgba(239,68,68,0.2);">
+                        <input type="checkbox" id="aim-pro-mode" style="width:20px; height:20px; accent-color:var(--danger); cursor:pointer;"> 
+                        💣 PRO MOD (Cezalı)
+                    </label>
+                </div>
                 <div style="display: flex; justify-content: center; gap: 20px; font-size: 1.2rem; font-weight: 600;">
                     <div>Kalan: <span id="aim-remaining" style="color: var(--primary);">10</span></div>
                     <div>İsabet: <span id="aim-accuracy" style="color: var(--good);">100</span>%</div>
