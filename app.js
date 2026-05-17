@@ -187,7 +187,10 @@ function setupEventListeners() {
 
     aimArena.addEventListener('mousedown', handleAimMiss);
     aimArena.addEventListener('touchstart', (e) => { e.preventDefault(); handleAimMiss(e); }, { passive: false });
-    aimStartBtn.addEventListener('click', startAimTest);
+    
+    aimStartBtn.addEventListener('mousedown', (e) => { e.stopPropagation(); startAimTest(e); });
+    aimStartBtn.addEventListener('touchstart', (e) => { e.preventDefault(); e.stopPropagation(); startAimTest(e); }, { passive: false });
+    aimStartBtn.addEventListener('click', (e) => { e.stopPropagation(); startAimTest(e); });
 
     btnFinish.addEventListener('click', () => {
         updateDashboard();
