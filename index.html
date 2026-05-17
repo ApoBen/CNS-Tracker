@@ -70,6 +70,7 @@
             <div class="test-selector mt-l">
                 <button id="btn-select-pvt" class="test-tab active">PVT (Reaksiyon)</button>
                 <button id="btn-select-cps" class="test-tab">CPS (Hız)</button>
+                <button id="btn-select-aim" class="test-tab">AIM (Hız+İsabet)</button>
             </div>
 
             <div class="glass-card text-center mt-l">
@@ -123,6 +124,18 @@
             </button>
         </section>
 
+        <!-- AIM SCREEN -->
+        <section id="screen-aim" class="screen hidden" style="display:flex; flex-direction:column; align-items:stretch;">
+            <div class="test-header text-center" style="padding-top:1rem; padding-bottom:1rem; z-index:10; pointer-events:none;">
+                <h2 id="aim-title" style="pointer-events:auto; font-size:1.5rem; margin:0;">Hedef Vurma</h2>
+                <p style="margin:5px 0 0 0; font-size:1rem; font-weight:bold;">Hedef: <span id="aim-remaining">10</span> | İsabet: <span id="aim-accuracy">100</span>%</p>
+            </div>
+            
+            <div id="aim-arena" style="flex:1; width:100%; position:relative; overflow:hidden; background: rgba(0,0,0,0.3); border-radius: 12px; border: 1px inset rgba(255,255,255,0.05); cursor:crosshair; touch-action:none; margin-bottom: 2rem;">
+                <button id="aim-start-btn" class="btn primary" style="position:absolute; top:50%; left:50%; transform:translate(-50%,-50%); z-index:5;">BAŞLA</button>
+            </div>
+        </section>
+
         <!-- RESULT SCREEN -->
         <section id="screen-result" class="screen hidden">
             <div class="glass-card text-center">
@@ -155,6 +168,7 @@
                     <select id="chart-type-filter" style="flex:1;">
                         <option value="pvt">PVT (Reaksiyon)</option>
                         <option value="cps">CPS (Tıklama Hızı)</option>
+                        <option value="aim">AIM (Hız+İsabet)</option>
                     </select>
                     <select id="chart-time-filter" style="flex:1;">
                         <option value="10">Son 10</option>
@@ -177,8 +191,9 @@
             </header>
             
             <div class="test-selector mt-l">
-                <button id="lb-tab-pvt" class="test-tab active">PVT Sıralaması</button>
-                <button id="lb-tab-cps" class="test-tab">CPS Sıralaması</button>
+                <button id="lb-tab-pvt" class="test-tab active">PVT</button>
+                <button id="lb-tab-cps" class="test-tab">CPS</button>
+                <button id="lb-tab-aim" class="test-tab">AIM</button>
             </div>
 
             <div class="glass-card mt-l" style="padding: 1rem; flex:1; display:flex; flex-direction:column; overflow:hidden;">

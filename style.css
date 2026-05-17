@@ -355,3 +355,24 @@ header h2 { margin: 0; font-size: 1.5rem; }
     font-size: 1.2rem;
     font-weight: 800;
 }
+
+/* AIM Test Specifics */
+.aim-target {
+    position: absolute;
+    width: 60px;
+    height: 60px;
+    background: radial-gradient(circle at 30% 30%, #ef4444, #991b1b);
+    border-radius: 50%;
+    border: 2px solid #fca5a5;
+    box-shadow: 0 0 15px rgba(239, 68, 68, 0.6), inset 0 0 10px rgba(0,0,0,0.5);
+    cursor: crosshair;
+    transform: translate(-50%, -50%);
+    animation: popIn 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    z-index: 2;
+    touch-action: manipulation;
+}
+
+@keyframes popIn {
+    0% { transform: translate(-50%, -50%) scale(0); opacity: 0; }
+    100% { transform: translate(-50%, -50%) scale(1); opacity: 1; }
+}

@@ -4,6 +4,7 @@ const screens = {
     dashboard: document.getElementById('screen-dashboard'),
     test: document.getElementById('screen-test'),
     pvt: document.getElementById('screen-pvt'),
+    aim: document.getElementById('screen-aim'),
     result: document.getElementById('screen-result'),
     chart: document.getElementById('screen-chart'),
     leaderboard: document.getElementById('screen-leaderboard')
@@ -31,6 +32,7 @@ const historyList = document.getElementById('history-list');
 // Test Selector
 const btnSelectCps = document.getElementById('btn-select-cps');
 const btnSelectPvt = document.getElementById('btn-select-pvt');
+const btnSelectAim = document.getElementById('btn-select-aim');
 const dashboardTestTitle = document.getElementById('dashboard-test-title');
 const dashboardInstruction = document.getElementById('dashboard-instruction');
 
@@ -46,6 +48,12 @@ const pvtTitle = document.getElementById('pvt-title');
 const pvtAttempt = document.getElementById('pvt-attempt');
 const pvtMaxAttempts = document.getElementById('pvt-max-attempts');
 const pvtInstruction = document.getElementById('pvt-instruction');
+
+// AIM Test Elements
+const aimArena = document.getElementById('aim-arena');
+const aimStartBtn = document.getElementById('aim-start-btn');
+const aimRemaining = document.getElementById('aim-remaining');
+const aimAccuracy = document.getElementById('aim-accuracy');
 
 // Result Elements
 const resultScoreValue = document.getElementById('result-score-value');
@@ -65,6 +73,7 @@ let myChart = null;
 const btnCloseLeaderboard = document.getElementById('btn-close-leaderboard');
 const lbTabPvt = document.getElementById('lb-tab-pvt');
 const lbTabCps = document.getElementById('lb-tab-cps');
+const lbTabAim = document.getElementById('lb-tab-aim');
 const lbLoading = document.getElementById('lb-loading');
 const leaderboardList = document.getElementById('leaderboard-list');
 const btnAdminReset = document.getElementById('btn-admin-reset');
@@ -75,27 +84,14 @@ let currentLbMode = 'pvt';
 
 // State
 let appState = {
-    profile: null, // { sport, game, username, leaderboardOptIn }
+    profile: null,
     history: [],   
     activeTestMode: 'pvt' 
 };
 
-let cpsState = {
-    isActive: false,
-    clicks: 0,
-    timeLeft: 5.0,
-    timer: null
-};
-
-let pvtState = {
-    isActive: false,
-    attempt: 1,
-    maxAttempts: 3,
-    results: [],
-    timerStart: 0,
-    timeoutId: null,
-    status: 'idle' 
-};
+let cpsState = { isActive: false, clicks: 0, timeLeft: 5.0, timer: null };
+let pvtState = { isActive: false, attempt: 1, maxAttempts: 3, results: [], timerStart: 0, timeoutId: null, status: 'idle' };
+let aimState = { isActive: false, targetsHit: 0, targetsMissed: 0, totalTargets: 10, times: [], lastSpawnTime: 0 };
 
 const CPS_DURATION = 5.0;
 
@@ -113,7 +109,7 @@ function init() {
 
 function showScreen(screenName) {
     Object.values(screens).forEach(s => {
-        if(s) s.classList.add('hidden')
+        if(s) s.classList.add('hidden');
     });
     screens[screenName].classList.remove('hidden');
 }
@@ -122,13 +118,6 @@ function loadState() {
     const saved = localStorage.getItem('cns_tracker_data');
     if (saved) {
         appState = JSON.parse(saved);
-        appState.history.forEach(item => {
-            if (!item.type) item.type = 'cps';
-            if (item.cps !== undefined) {
-                item.score = item.cps;
-                delete item.cps;
-            }
-        });
         if (!appState.activeTestMode) appState.activeTestMode = 'pvt';
     }
 }
@@ -139,13 +128,11 @@ function saveState() {
 
 // Event Listeners
 function setupEventListeners() {
-    // Onboarding Checkbox
     leaderboardCheckbox.addEventListener('change', (e) => {
         if(e.target.checked) usernameContainer.classList.remove('hidden');
         else usernameContainer.classList.add('hidden');
     });
 
-    // Profil Kaydet
     btnSaveProfile.addEventListener('click', () => {
         appState.profile = { 
             sport: sportSelect.value, 
@@ -158,10 +145,8 @@ function setupEventListeners() {
         showScreen('dashboard');
     });
 
-    // Ayarları İptal Et
     btnCancelSettings.addEventListener('click', () => showScreen('dashboard'));
 
-    // Ayarları Aç
     btnSettings.addEventListener('click', () => {
         onboardingTitle.textContent = "Ayarlar";
         sportSelect.value = appState.profile.sport;
@@ -177,34 +162,38 @@ function setupEventListeners() {
         showScreen('onboarding');
     });
 
-    // Test Seçiciler
     btnSelectCps.addEventListener('click', () => setTestMode('cps'));
     btnSelectPvt.addEventListener('click', () => setTestMode('pvt'));
+    btnSelectAim.addEventListener('click', () => setTestMode('aim'));
 
-    // Testi Başlat
     btnStartTest.addEventListener('click', () => {
         if (appState.activeTestMode === 'cps') {
             prepareCpsTest();
             showScreen('test');
+        } else if (appState.activeTestMode === 'aim') {
+            prepareAimTest();
+            showScreen('aim');
         } else {
             preparePvtTest();
             showScreen('pvt');
         }
     });
 
-    // Tıklama Alanları
     clickArea.addEventListener('mousedown', handleCpsClick);
     clickArea.addEventListener('touchstart', (e) => { e.preventDefault(); handleCpsClick(e); }, { passive: false });
+    
     pvtArea.addEventListener('mousedown', handlePvtClick);
     pvtArea.addEventListener('touchstart', (e) => { e.preventDefault(); handlePvtClick(e); }, { passive: false });
 
-    // Sonucu Kapat
+    aimArena.addEventListener('mousedown', handleAimMiss);
+    aimArena.addEventListener('touchstart', (e) => { e.preventDefault(); handleAimMiss(e); }, { passive: false });
+    aimStartBtn.addEventListener('click', startAimTest);
+
     btnFinish.addEventListener('click', () => {
         updateDashboard();
         showScreen('dashboard');
     });
 
-    // Grafik
     btnChart.addEventListener('click', () => {
         showScreen('chart');
         renderChart();
@@ -213,24 +202,15 @@ function setupEventListeners() {
     chartTypeFilter.addEventListener('change', renderChart);
     chartTimeFilter.addEventListener('change', renderChart);
 
-    // Liderlik Tablosu
     btnLeaderboard.addEventListener('click', () => {
         showScreen('leaderboard');
         fetchAndRenderLeaderboard(currentLbMode);
     });
     btnCloseLeaderboard.addEventListener('click', () => showScreen('dashboard'));
-    lbTabPvt.addEventListener('click', () => {
-        currentLbMode = 'pvt';
-        lbTabPvt.classList.add('active');
-        lbTabCps.classList.remove('active');
-        fetchAndRenderLeaderboard('pvt');
-    });
-    lbTabCps.addEventListener('click', () => {
-        currentLbMode = 'cps';
-        lbTabCps.classList.add('active');
-        lbTabPvt.classList.remove('active');
-        fetchAndRenderLeaderboard('cps');
-    });
+    
+    lbTabPvt.addEventListener('click', () => setLbTab('pvt'));
+    lbTabCps.addEventListener('click', () => setLbTab('cps'));
+    lbTabAim.addEventListener('click', () => setLbTab('aim'));
 
     btnAdminReset.addEventListener('click', async () => {
         const pass = prompt("Yönetici Şifresi:");
@@ -241,7 +221,7 @@ function setupEventListeners() {
                     await fetch(JSONBLOB_URL, {
                         method: 'PUT',
                         headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
-                        body: JSON.stringify({"name": "cns_tracker", "data": {cps:[], pvt:[]}})
+                        body: JSON.stringify({"name": "cns_tracker", "data": {cps:[], pvt:[], aim:[]}})
                     });
                     alert("Başarıyla Sıfırlandı!");
                     btnAdminReset.textContent = "Tüm Tabloyu Sıfırla (Admin)";
@@ -257,17 +237,29 @@ function setupEventListeners() {
     });
 }
 
+function setLbTab(mode) {
+    currentLbMode = mode;
+    lbTabPvt.classList.toggle('active', mode === 'pvt');
+    lbTabCps.classList.toggle('active', mode === 'cps');
+    lbTabAim.classList.toggle('active', mode === 'aim');
+    fetchAndRenderLeaderboard(mode);
+}
+
 function setTestMode(mode) {
     appState.activeTestMode = mode;
     saveState();
+    
+    btnSelectCps.classList.toggle('active', mode === 'cps');
+    btnSelectPvt.classList.toggle('active', mode === 'pvt');
+    btnSelectAim.classList.toggle('active', mode === 'aim');
+    
     if (mode === 'cps') {
-        btnSelectCps.classList.add('active');
-        btnSelectPvt.classList.remove('active');
         dashboardTestTitle.textContent = "CPS Testi";
         dashboardInstruction.textContent = "5 saniyelik tıklama testi ile sinir sistemi yorgunluğunu ölç.";
+    } else if (mode === 'aim') {
+        dashboardTestTitle.textContent = "AIM Testi";
+        dashboardInstruction.textContent = "Rastgele çıkan hedefleri isabetle ve en hızlı şekilde vur.";
     } else {
-        btnSelectPvt.classList.add('active');
-        btnSelectCps.classList.remove('active');
         dashboardTestTitle.textContent = "PVT Testi";
         dashboardInstruction.textContent = "Rastgele yanan ışığa en hızlı şekilde tepki ver. (Altın Standart)";
     }
@@ -276,132 +268,159 @@ function setTestMode(mode) {
 
 // ---------------- CPS TEST LOGIC ----------------
 function prepareCpsTest() {
-    cpsState.isActive = false;
-    cpsState.clicks = 0;
-    cpsState.timeLeft = CPS_DURATION;
+    cpsState.isActive = false; cpsState.clicks = 0; cpsState.timeLeft = CPS_DURATION;
     timeLeftDisplay.textContent = cpsState.timeLeft.toFixed(1);
     clickCountDisplay.textContent = cpsState.clicks;
     clickInstruction.textContent = "BAŞLAMAK İÇİN TIKLA";
     clickArea.classList.remove('active-test');
     clickArea.style.borderColor = clickArea.style.color = clickArea.style.boxShadow = clickArea.style.backgroundColor = '';
 }
-
 function handleCpsClick(e) {
     if (!cpsState.isActive && cpsState.timeLeft === CPS_DURATION) startCpsTest();
-    if (cpsState.isActive) {
-        cpsState.clicks++;
-        clickCountDisplay.textContent = cpsState.clicks;
-    }
+    if (cpsState.isActive) { cpsState.clicks++; clickCountDisplay.textContent = cpsState.clicks; }
     if (e) createRipple(e, clickArea, cpsState.isActive ? getCpsHue() : 220);
 }
-
 function startCpsTest() {
-    cpsState.isActive = true;
-    clickInstruction.textContent = "";
-    clickArea.classList.add('active-test');
+    cpsState.isActive = true; clickInstruction.textContent = ""; clickArea.classList.add('active-test');
     cpsState.timer = setInterval(() => {
         cpsState.timeLeft -= 0.1;
-        if (cpsState.timeLeft <= 0) {
-            endCpsTest();
-        } else {
-            timeLeftDisplay.textContent = cpsState.timeLeft.toFixed(1);
-            updateCpsVisuals();
-        }
+        if (cpsState.timeLeft <= 0) endCpsTest();
+        else { timeLeftDisplay.textContent = cpsState.timeLeft.toFixed(1); updateCpsVisuals(); }
     }, 100);
 }
-
 function endCpsTest() {
-    clearInterval(cpsState.timer);
-    cpsState.isActive = false;
-    timeLeftDisplay.textContent = "0.0";
-    clickArea.classList.remove('active-test');
+    clearInterval(cpsState.timer); cpsState.isActive = false;
+    timeLeftDisplay.textContent = "0.0"; clickArea.classList.remove('active-test');
     processResult(cpsState.clicks / CPS_DURATION, 'cps');
 }
-
 function getCpsHue() {
     const elapsed = CPS_DURATION - cpsState.timeLeft;
     let currentCPS = elapsed > 0.1 ? cpsState.clicks / elapsed : 0;
     let hue = 220 - (currentCPS * 15);
-    if (hue < 0) hue = 0;
-    return hue;
+    return hue < 0 ? 0 : hue;
 }
-
 function updateCpsVisuals() {
     if (!cpsState.isActive) return;
     const hue = getCpsHue();
-    const colorStr = `hsl(${hue}, 100%, 50%)`;
-    const glowStr = `hsla(${hue}, 100%, 50%, 0.3)`;
-    clickArea.style.borderColor = clickArea.style.color = colorStr;
-    clickArea.style.boxShadow = `0 0 30px ${glowStr}, inset 0 0 20px ${glowStr}`;
+    clickArea.style.borderColor = clickArea.style.color = `hsl(${hue}, 100%, 50%)`;
+    clickArea.style.boxShadow = `0 0 30px hsla(${hue}, 100%, 50%, 0.3), inset 0 0 20px hsla(${hue}, 100%, 50%, 0.3)`;
     clickArea.style.backgroundColor = `hsla(${hue}, 100%, 50%, 0.05)`;
 }
 
 // ---------------- PVT TEST LOGIC ----------------
 function preparePvtTest() {
-    const randomAttempts = Math.floor(Math.random() * 3) + 3; // 3, 4, or 5
-    pvtState = {
-        isActive: true,
-        attempt: 1,
-        maxAttempts: randomAttempts,
-        results: [],
-        timerStart: 0,
-        timeoutId: null,
-        status: 'idle'
-    };
+    const randomAttempts = Math.floor(Math.random() * 3) + 3;
+    pvtState = { isActive: true, attempt: 1, maxAttempts: randomAttempts, results: [], timerStart: 0, timeoutId: null, status: 'idle' };
     pvtMaxAttempts.textContent = randomAttempts;
     nextPvtAttempt();
 }
-
 function nextPvtAttempt() {
-    pvtTitle.textContent = "Hazırlan...";
-    pvtAttempt.textContent = pvtState.attempt;
-    pvtArea.className = 'click-area pvt-waiting';
-    pvtInstruction.textContent = "BEKLE";
+    pvtTitle.textContent = "Hazırlan..."; pvtAttempt.textContent = pvtState.attempt;
+    pvtArea.className = 'click-area pvt-waiting'; pvtInstruction.textContent = "BEKLE";
     pvtState.status = 'waiting';
-
-    const delay = Math.random() * 8000 + 2000; 
     clearTimeout(pvtState.timeoutId);
     pvtState.timeoutId = setTimeout(() => {
-        pvtState.status = 'ready';
-        pvtArea.className = 'click-area pvt-ready';
-        pvtInstruction.textContent = "DOKUN!";
-        pvtState.timerStart = performance.now();
-    }, delay);
+        pvtState.status = 'ready'; pvtArea.className = 'click-area pvt-ready';
+        pvtInstruction.textContent = "DOKUN!"; pvtState.timerStart = performance.now();
+    }, Math.random() * 8000 + 2000);
 }
-
 function handlePvtClick(e) {
     if (!pvtState.isActive) return;
     if (e) createRipple(e, pvtArea, pvtState.status === 'ready' ? 120 : 0);
-
     if (pvtState.status === 'waiting') {
-        clearTimeout(pvtState.timeoutId);
-        pvtArea.className = 'click-area pvt-false-start';
-        pvtInstruction.textContent = "ERKEN TIKLADIN!";
-        pvtState.status = 'idle';
+        clearTimeout(pvtState.timeoutId); pvtArea.className = 'click-area pvt-false-start';
+        pvtInstruction.textContent = "ERKEN TIKLADIN!"; pvtState.status = 'idle';
         setTimeout(() => nextPvtAttempt(), 1500);
-    } 
-    else if (pvtState.status === 'ready') {
+    } else if (pvtState.status === 'ready') {
         const rt = performance.now() - pvtState.timerStart;
-        pvtState.results.push(rt);
-        pvtState.status = 'idle';
-        pvtArea.className = 'click-area';
-        pvtInstruction.textContent = `${Math.round(rt)} ms`;
-        
+        pvtState.results.push(rt); pvtState.status = 'idle';
+        pvtArea.className = 'click-area'; pvtInstruction.textContent = `${Math.round(rt)} ms`;
         setTimeout(() => {
-            if (pvtState.attempt < pvtState.maxAttempts) {
-                pvtState.attempt++;
-                nextPvtAttempt();
-            } else {
-                endPvtTest();
-            }
+            if (pvtState.attempt < pvtState.maxAttempts) { pvtState.attempt++; nextPvtAttempt(); }
+            else endPvtTest();
         }, 1000);
     }
 }
-
 function endPvtTest() {
     pvtState.isActive = false;
-    const avgRt = pvtState.results.reduce((a, b) => a + b, 0) / pvtState.results.length;
-    processResult(avgRt, 'pvt');
+    processResult(pvtState.results.reduce((a, b) => a + b, 0) / pvtState.results.length, 'pvt');
+}
+
+// ---------------- AIM TEST LOGIC ----------------
+function prepareAimTest() {
+    aimState = { isActive: false, targetsHit: 0, targetsMissed: 0, totalTargets: 10, times: [], lastSpawnTime: 0 };
+    aimRemaining.textContent = "10";
+    aimAccuracy.textContent = "100";
+    aimArena.innerHTML = '';
+    aimArena.appendChild(aimStartBtn);
+    aimStartBtn.style.display = 'block';
+}
+
+function startAimTest(e) {
+    if(e) e.stopPropagation();
+    aimState.isActive = true;
+    aimStartBtn.style.display = 'none';
+    spawnAimTarget();
+}
+
+function spawnAimTarget() {
+    aimArena.innerHTML = ''; 
+    const total = aimState.targetsHit + aimState.targetsMissed;
+    if (total >= aimState.totalTargets) return endAimTest();
+    
+    const target = document.createElement('div');
+    target.className = 'aim-target';
+    
+    const padding = 30; // half of target size
+    const rect = aimArena.getBoundingClientRect();
+    const maxX = rect.width - padding * 2;
+    const maxY = rect.height - padding * 2;
+    
+    const x = Math.max(padding, Math.floor(Math.random() * maxX) + padding);
+    const y = Math.max(padding, Math.floor(Math.random() * maxY) + padding);
+    
+    target.style.left = `${x}px`;
+    target.style.top = `${y}px`;
+    
+    target.addEventListener('mousedown', handleAimHit);
+    target.addEventListener('touchstart', (e) => { e.preventDefault(); handleAimHit(e); }, {passive: false});
+    
+    aimArena.appendChild(target);
+    aimState.lastSpawnTime = performance.now();
+}
+
+function handleAimHit(e) {
+    if (!aimState.isActive) return;
+    e.stopPropagation();
+    const rt = performance.now() - aimState.lastSpawnTime;
+    aimState.times.push(rt);
+    aimState.targetsHit++;
+    updateAimUI();
+    createRipple(e, aimArena, 120); 
+    spawnAimTarget();
+}
+
+function handleAimMiss(e) {
+    if (!aimState.isActive || e.target === aimStartBtn) return;
+    aimState.targetsMissed++;
+    updateAimUI();
+    createRipple(e, aimArena, 0);
+    spawnAimTarget();
+}
+
+function updateAimUI() {
+    const total = aimState.targetsHit + aimState.targetsMissed;
+    const acc = Math.round((aimState.targetsHit / total) * 100);
+    aimRemaining.textContent = aimState.totalTargets - total;
+    aimAccuracy.textContent = isNaN(acc) ? 100 : acc;
+}
+
+function endAimTest() {
+    aimState.isActive = false;
+    const avgTime = aimState.times.reduce((a,b) => a+b, 0) / aimState.times.length || 0;
+    // Penalty: +150ms per miss
+    const finalScore = avgTime + (aimState.targetsMissed * 150);
+    processResult(finalScore, 'aim');
 }
 
 // ---------------- COMMON LOGIC ----------------
@@ -454,7 +473,7 @@ function processResult(score, type) {
         }
         resultScoreValue.textContent = score.toFixed(1);
         resultScoreUnit.textContent = 'CPS';
-    } else {
+    } else if (type === 'pvt') {
         if (score <= 300) {
             statusClass = 'good'; statusText = 'Kusursuz Reaksiyon! 🟢';
             recText = 'Motor nöron ateşlemelerin zirvede. Uyaranlara verdiğin tepki süresi kusursuz ve çok hızlı.';
@@ -467,6 +486,19 @@ function processResult(score, type) {
         }
         resultScoreValue.textContent = Math.round(score);
         resultScoreUnit.textContent = 'MS';
+    } else if (type === 'aim') {
+        if (score <= 500) {
+            statusClass = 'good'; statusText = 'El-Göz Koordinasyonu Zirvede 🟢';
+            recText = 'Motor becerilerin kusursuz işliyor. Hem çok hızlı hem de isabetlisin. Ağır antrenmana tamamen hazırsın.';
+        } else if (score <= 700) {
+            statusClass = 'normal'; statusText = 'Normal Koordinasyon 🟡';
+            recText = 'İsabet ve hız dengen standart sınırlar içerisinde. İnce motor becerilerin günlük düzeyde.';
+        } else {
+            statusClass = 'fatigued'; statusText = 'Odak Kaybı / Titreme 🔴';
+            recText = 'İsabet oranın düşük veya tepkilerin çok yavaş (Tremor/Odak kaybı). Sinir sistemin bitkin, motor becerilerin zayıflamış.';
+        }
+        resultScoreValue.textContent = Math.round(score);
+        resultScoreUnit.textContent = 'Puan';
     }
 
     resultFatigueStatus.className = `status-title ${statusClass}`;
@@ -490,8 +522,11 @@ function updateDashboard() {
     if (type === 'cps') {
         statBaseline.textContent = calculateCpsBaseline().toFixed(1);
         statLast.textContent = history.length > 0 ? history[0].score.toFixed(1) : '--';
-    } else {
+    } else if (type === 'pvt') {
         statBaseline.textContent = '< 300';
+        statLast.textContent = history.length > 0 ? Math.round(history[0].score) : '--';
+    } else if (type === 'aim') {
+        statBaseline.textContent = '< 500';
         statLast.textContent = history.length > 0 ? Math.round(history[0].score) : '--';
     }
 
@@ -504,7 +539,10 @@ function updateDashboard() {
     history.forEach(item => {
         const d = new Date(item.date);
         const dateStr = `${d.getDate().toString().padStart(2,'0')}/${(d.getMonth()+1).toString().padStart(2,'0')} ${d.getHours().toString().padStart(2,'0')}:${d.getMinutes().toString().padStart(2,'0')}`;
-        const valStr = type === 'cps' ? `${item.score.toFixed(1)} CPS` : `${Math.round(item.score)} ms`;
+        let valStr = `${Math.round(item.score)} Puan`;
+        if (type === 'cps') valStr = `${item.score.toFixed(1)} CPS`;
+        else if (type === 'pvt') valStr = `${Math.round(item.score)} ms`;
+        
         const li = document.createElement('li');
         li.className = 'history-item';
         li.innerHTML = `<span class="history-date">${dateStr}</span><span class="history-score score-${item.status}">${valStr}</span>`;
@@ -523,10 +561,26 @@ function renderChart() {
     const ctx = chartCanvas.getContext('2d');
     
     if (myChart) myChart.destroy();
-    const isPVT = type === 'pvt';
-    const lineColor = isPVT ? '#ef4444' : '#3b82f6';
+    
+    let lineColor = '#3b82f6';
+    let gradientStart = 'rgba(59, 130, 246, 0.5)';
+    let chartLabel = 'Hız (CPS)';
+    let unit = ' CPS';
+    
+    if (type === 'pvt') {
+        lineColor = '#ef4444';
+        gradientStart = 'rgba(239, 68, 68, 0.5)';
+        chartLabel = 'Reaksiyon (ms)';
+        unit = ' ms';
+    } else if (type === 'aim') {
+        lineColor = '#10b981';
+        gradientStart = 'rgba(16, 185, 129, 0.5)';
+        chartLabel = 'AIM Puanı';
+        unit = ' Puan';
+    }
+    
     const gradient = ctx.createLinearGradient(0, 0, 0, 400);
-    gradient.addColorStop(0, isPVT ? 'rgba(239, 68, 68, 0.5)' : 'rgba(59, 130, 246, 0.5)');
+    gradient.addColorStop(0, gradientStart);
     gradient.addColorStop(1, 'rgba(0, 0, 0, 0)');
 
     myChart = new Chart(ctx, {
@@ -534,7 +588,7 @@ function renderChart() {
         data: {
             labels,
             datasets: [{
-                label: isPVT ? 'Reaksiyon (ms)' : 'Hız (CPS)',
+                label: chartLabel,
                 data: dataPoints,
                 borderColor: lineColor, backgroundColor: gradient,
                 borderWidth: 3, fill: true, tension: 0.3,
@@ -544,7 +598,7 @@ function renderChart() {
         },
         options: {
             responsive: true, maintainAspectRatio: false,
-            plugins: { legend: { display: false }, tooltip: { theme: 'dark', backgroundColor: 'rgba(15, 23, 42, 0.9)', bodyFont: { weight: 'bold' }, callbacks: { label: c => c.parsed.y + (isPVT?' ms':' CPS') } } },
+            plugins: { legend: { display: false }, tooltip: { theme: 'dark', backgroundColor: 'rgba(15, 23, 42, 0.9)', bodyFont: { weight: 'bold' }, callbacks: { label: c => c.parsed.y + unit } } },
             scales: { y: { grid: { color: 'rgba(255, 255, 255, 0.05)' }, ticks: { color: '#94a3b8' } }, x: { grid: { display: false }, ticks: { color: '#94a3b8', maxRotation: 45, minRotation: 45 } } }
         }
     });
@@ -557,12 +611,14 @@ async function syncLeaderboard(score, type, username) {
         const json = await res.json();
         const data = json.data;
         
+        if (!data.aim) data.aim = []; // Ensure aim exists
+        
         const i = data[type].findIndex(u => u.username === username);
         let updated = false;
         
         if (i > -1) {
             const old = data[type][i].score;
-            if ((type === 'pvt' && score < old) || (type === 'cps' && score > old)) {
+            if ((type === 'pvt' && score < old) || (type === 'aim' && score < old) || (type === 'cps' && score > old)) {
                 data[type][i].score = score;
                 data[type][i].date = new Date().toISOString();
                 updated = true;
@@ -600,10 +656,10 @@ async function fetchAndRenderLeaderboard(type) {
         const json = await res.json();
         let list = json.data[type] || [];
         
-        if (type === 'pvt') list.sort((a, b) => a.score - b.score);
+        if (type === 'pvt' || type === 'aim') list.sort((a, b) => a.score - b.score);
         else list.sort((a, b) => b.score - a.score);
         
-        list = list.slice(0, 20); // İlk 20 kişi
+        list = list.slice(0, 20);
         
         lbLoading.classList.add('hidden');
         if (list.length === 0) {
@@ -620,14 +676,21 @@ async function fetchAndRenderLeaderboard(type) {
             if (index === 1) rankMedal = '🥈';
             if (index === 2) rankMedal = '🥉';
             
-            const valStr = type === 'cps' ? `${item.score.toFixed(1)} CPS` : `${Math.round(item.score)} ms`;
+            let valStr = `${Math.round(item.score)} Puan`;
+            if (type === 'cps') valStr = `${item.score.toFixed(1)} CPS`;
+            else if (type === 'pvt') valStr = `${Math.round(item.score)} ms`;
+            
+            // Aim colors: <500 good, >700 bad
+            let scoreClass = '';
+            if (type === 'pvt') scoreClass = item.score > 400 ? 'score-fatigued' : (item.score <= 300 ? 'score-good' : '');
+            else if (type === 'aim') scoreClass = item.score > 700 ? 'score-fatigued' : (item.score <= 500 ? 'score-good' : '');
             
             li.innerHTML = `
                 <div style="display:flex; align-items:center; gap: 10px;">
                     <span style="font-size: 1.5rem; width:35px; text-align:center;">${rankMedal}</span>
                     <span class="lb-item-name">${item.username}</span>
                 </div>
-                <span class="lb-item-score ${type==='pvt'&&item.score>400?'score-fatigued':type==='pvt'&&item.score<=300?'score-good':''}">${valStr}</span>
+                <span class="lb-item-score ${scoreClass}">${valStr}</span>
             `;
             leaderboardList.appendChild(li);
         });
