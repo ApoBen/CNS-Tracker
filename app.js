@@ -176,6 +176,7 @@ function setupEventListeners() {
     btnSelectCps.addEventListener('click', () => setTestMode('cps'));
     btnSelectPvt.addEventListener('click', () => setTestMode('pvt'));
     btnSelectAim.addEventListener('click', () => setTestMode('aim'));
+    btnSelectStroop.addEventListener('click', () => setTestMode('stroop'));
 
     btnStartTest.addEventListener('click', () => {
         if (appState.activeTestMode === 'cps') {
@@ -184,6 +185,9 @@ function setupEventListeners() {
         } else if (appState.activeTestMode === 'aim') {
             prepareAimTest();
             showScreen('aim');
+        } else if (appState.activeTestMode === 'stroop') {
+            prepareStroopTest();
+            showScreen('stroop');
         } else {
             preparePvtTest();
             showScreen('pvt');
@@ -230,6 +234,7 @@ function setupEventListeners() {
     lbTabPvt.addEventListener('click', () => setLbTab('pvt'));
     lbTabCps.addEventListener('click', () => setLbTab('cps'));
     lbTabAim.addEventListener('click', () => setLbTab('aim'));
+    lbTabStroop.addEventListener('click', () => setLbTab('stroop'));
 
     btnAdminReset.addEventListener('click', async () => {
         const pass = prompt("Yönetici Şifresi:");
@@ -261,6 +266,7 @@ function setLbTab(mode) {
     lbTabPvt.classList.toggle('active', mode === 'pvt');
     lbTabCps.classList.toggle('active', mode === 'cps');
     lbTabAim.classList.toggle('active', mode === 'aim');
+    lbTabStroop.classList.toggle('active', mode === 'stroop');
     fetchAndRenderLeaderboard(mode);
 }
 
@@ -271,6 +277,7 @@ function setTestMode(mode) {
     btnSelectCps.classList.toggle('active', mode === 'cps');
     btnSelectPvt.classList.toggle('active', mode === 'pvt');
     btnSelectAim.classList.toggle('active', mode === 'aim');
+    btnSelectStroop.classList.toggle('active', mode === 'stroop');
     
     if (mode === 'cps') {
         dashboardTestTitle.textContent = "CPS Testi";
@@ -278,6 +285,9 @@ function setTestMode(mode) {
     } else if (mode === 'aim') {
         dashboardTestTitle.textContent = "AIM Testi";
         dashboardInstruction.textContent = "Rastgele çıkan hedefleri isabetle ve en hızlı şekilde vur.";
+    } else if (mode === 'stroop') {
+        dashboardTestTitle.textContent = "Stroop Testi";
+        dashboardInstruction.textContent = "Ekranda yazan kelimeyi DEĞİL, kelimenin RENGİNİ hızlıca seç.";
     } else {
         dashboardTestTitle.textContent = "PVT Testi";
         dashboardInstruction.textContent = "Rastgele yanan ışığa en hızlı şekilde tepki ver. (Altın Standart)";
@@ -526,6 +536,11 @@ function nextStroopRound() {
     stroopState.targetColor = colorObj.hex;
     stroopWord.textContent = textObj.name;
     stroopWord.style.color = colorObj.hex;
+    
+    // Animation trigger
+    stroopWord.style.animation = 'none';
+    stroopWord.offsetHeight; /* reflow */
+    stroopWord.style.animation = 'popIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275)';
     
     stroopState.startTime = performance.now();
 }
