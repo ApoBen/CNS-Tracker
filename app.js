@@ -455,9 +455,15 @@ function updateAimUI() {
 
 function endAimTest() {
     aimState.isActive = false;
-    const avgTime = aimState.times.reduce((a,b) => a+b, 0) / aimState.times.length || 0;
-    // Penalty: +150ms per miss, +500ms per bomb hit
-    const finalScore = avgTime + (aimState.targetsMissed * 150) + (aimState.bombsHit * 500);
+    const avgTime = aimState.times.reduce((a,b) => a+b, 0) / aimState.times.length || 1;
+    const accuracy = aimState.targetsHit / aimState.totalTargets;
+    
+    // Yüksek skor daha iyi: 
+    // Hız puanı: (10000 / Ortalama Süre) * 100
+    // İsabetle çarpılır, bombalar eksi puan getirir (-500)
+    let rawScore = (10000 / Math.max(avgTime, 50)) * 100 * accuracy;
+    const finalScore = Math.max(0, Math.round(rawScore - (aimState.bombsHit * 500)));
+    
     processResult(finalScore, 'aim');
 }
 
@@ -525,10 +531,10 @@ function processResult(score, type) {
         resultScoreValue.textContent = Math.round(score);
         resultScoreUnit.textContent = 'MS';
     } else if (type === 'aim') {
-        if (score <= 500) {
+        if (score >= 3000) {
             statusClass = 'good'; statusText = 'El-Göz Koordinasyonu Zirvede 🟢';
             recText = 'Motor becerilerin kusursuz işliyor. Hem çok hızlı hem de isabetlisin. Merkezi sinir sistemi ateşlemesi ve koordinasyonu en üst düzeyde.';
-        } else if (score <= 700) {
+        } else if (score >= 2000) {
             statusClass = 'normal'; statusText = 'Normal Koordinasyon 🟡';
             recText = 'İsabet ve hız dengen standart sınırlar içerisinde. İnce motor becerilerin ve sinir iletimi normal seviyede çalışıyor.';
         } else {
@@ -566,7 +572,7 @@ function updateDashboard() {
         statBaseline.textContent = '< 300';
         statLast.textContent = history.length > 0 ? Math.round(history[0].score) : '--';
     } else if (type === 'aim') {
-        statBaseline.textContent = '< 500';
+        statBaseline.textContent = '> 3000';
         statLast.textContent = history.length > 0 ? Math.round(history[0].score) : '--';
     }
 
@@ -661,7 +667,8 @@ async function syncLeaderboard(score, type, username) {
         
         if (i > -1) {
             const old = data[type][i].score;
-            if ((type === 'pvt' && score < old) || (type === 'aim' && score < old) || (type === 'cps' && score > old)) {
+            // PVT düşük iyidir, CPS ve AIM yüksek iyidir
+            if ((type === 'pvt' && score < old) || (type === 'aim' && score > old) || (type === 'cps' && score > old)) {
                 data[type][i].score = score;
                 data[type][i].date = new Date().toISOString();
                 updated = true;
@@ -699,8 +706,8 @@ async function fetchAndRenderLeaderboard(type) {
         const json = await res.json();
         let list = json.data[type] || [];
         
-        if (type === 'pvt' || type === 'aim') list.sort((a, b) => a.score - b.score);
-        else list.sort((a, b) => b.score - a.score);
+        if (type === 'pvt') list.sort((a, b) => a.score - b.score);
+        else list.sort((a, b) => b.score - a.score); // cps and aim
         
         list = list.slice(0, 20);
         
@@ -726,7 +733,7 @@ async function fetchAndRenderLeaderboard(type) {
             // Aim colors: <500 good, >700 bad
             let scoreClass = '';
             if (type === 'pvt') scoreClass = item.score > 400 ? 'score-fatigued' : (item.score <= 300 ? 'score-good' : '');
-            else if (type === 'aim') scoreClass = item.score > 700 ? 'score-fatigued' : (item.score <= 500 ? 'score-good' : '');
+            else if (type === 'aim') scoreClass = item.score < 2000 ? 'score-fatigued' : (item.score >= 3000 ? 'score-good' : '');
             
             li.innerHTML = `
                 <div style="display:flex; align-items:center; gap: 10px;">
