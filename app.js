@@ -233,18 +233,26 @@ function setupEventListeners() {
     });
 
     btnAdminReset.addEventListener('click', async () => {
-        if(confirm('Tüm dünya liderlik tablosunu SIFIRLAMAK istediğine emin misin?')) {
-            try {
-                await fetch(JSONBLOB_URL, {
-                    method: 'PUT',
-                    headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
-                    body: JSON.stringify({cps:[], pvt:[]})
-                });
-                alert("Sıfırlandı.");
-                fetchAndRenderLeaderboard(currentLbMode);
-            } catch (e) {
-                alert("Hata oluştu.");
+        const pass = prompt("Yönetici Şifresi:");
+        if (pass === "7355608") {
+            if(confirm('Tüm dünya liderlik tablosunu SIFIRLAMAK istediğine emin misin?')) {
+                try {
+                    btnAdminReset.textContent = "Sıfırlanıyor...";
+                    await fetch(JSONBLOB_URL, {
+                        method: 'PUT',
+                        headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+                        body: JSON.stringify({cps:[], pvt:[]})
+                    });
+                    alert("Başarıyla Sıfırlandı!");
+                    btnAdminReset.textContent = "Tüm Tabloyu Sıfırla (Admin)";
+                    fetchAndRenderLeaderboard(currentLbMode);
+                } catch (e) {
+                    alert("Sunucuya ulaşılamadı.");
+                    btnAdminReset.textContent = "Tüm Tabloyu Sıfırla (Admin)";
+                }
             }
+        } else if (pass !== null) {
+            alert("Hatalı şifre!");
         }
     });
 }
@@ -579,7 +587,8 @@ async function fetchAndRenderLeaderboard(type) {
     leaderboardList.innerHTML = '';
     lbLoading.classList.remove('hidden');
     
-    if (appState.profile && appState.profile.username === 'ApoBen') {
+    const uname = appState.profile ? appState.profile.username.toLowerCase() : '';
+    if (uname === 'apoben' || uname === 'apobenn') {
         btnAdminReset.classList.remove('hidden');
     } else {
         btnAdminReset.classList.add('hidden');
