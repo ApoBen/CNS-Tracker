@@ -39,7 +39,19 @@
                     </select>
                 </div>
 
-                <button id="btn-save-profile" class="btn primary">Kaydet ve Başla</button>
+                <div class="form-group leaderboard-optin" style="margin-top: 2rem; padding-top: 1rem; border-top: 1px solid rgba(255,255,255,0.1);">
+                    <label style="display:flex; align-items:center; gap: 10px; cursor: pointer;">
+                        <input type="checkbox" id="leaderboard-checkbox" style="width: 20px; height: 20px;">
+                        <span>Liderlik Tablosuna Katıl (Dünya Sıralaması)</span>
+                    </label>
+                    
+                    <div id="username-container" class="hidden mt-l">
+                        <label for="username-input">Kullanıcı Adı (Nickname)</label>
+                        <input type="text" id="username-input" placeholder="Örn: Aslan Parçası" maxlength="20" style="width:100%; padding: 12px; border-radius: 8px; background: rgba(15,23,42,0.8); border: 1px solid rgba(255,255,255,0.1); color: white; outline: none; margin-top: 5px;">
+                    </div>
+                </div>
+
+                <button id="btn-save-profile" class="btn primary" style="margin-top: 1rem;">Kaydet ve Başla</button>
                 <button id="btn-cancel-settings" class="btn secondary hidden">İptal</button>
             </div>
         </section>
@@ -48,7 +60,8 @@
         <section id="screen-dashboard" class="screen hidden">
             <header>
                 <h2>CNS Tracker</h2>
-                <div>
+                <div style="display: flex; gap: 10px;">
+                    <button id="btn-leaderboard" class="icon-btn" aria-label="Liderlik Tablosu">🏆</button>
                     <button id="btn-chart" class="icon-btn" aria-label="Grafikler">📊</button>
                     <button id="btn-settings" class="icon-btn" aria-label="Ayarlar">⚙️</button>
                 </div>
@@ -152,6 +165,35 @@
                 
                 <div class="chart-container" style="position: relative; flex:1; min-height:300px; width:100%;">
                     <canvas id="performanceChart"></canvas>
+                </div>
+            </div>
+        </section>
+
+        <!-- LEADERBOARD SCREEN -->
+        <section id="screen-leaderboard" class="screen hidden">
+            <header>
+                <h2>Liderlik Tablosu</h2>
+                <button id="btn-close-leaderboard" class="icon-btn">✖</button>
+            </header>
+            
+            <div class="test-selector mt-l">
+                <button id="lb-tab-pvt" class="test-tab active">PVT Sıralaması</button>
+                <button id="lb-tab-cps" class="test-tab">CPS Sıralaması</button>
+            </div>
+
+            <div class="glass-card mt-l" style="padding: 1rem; flex:1; display:flex; flex-direction:column; overflow:hidden;">
+                <div id="lb-loading" class="text-center mt-l">
+                    <p class="pulse-anim" style="box-shadow: none; display:inline-block;">Yükleniyor...</p>
+                </div>
+                
+                <div class="history-area" style="margin-top:0;">
+                    <ul id="leaderboard-list">
+                        <!-- JS ile doldurulacak -->
+                    </ul>
+                </div>
+
+                <div class="mt-l text-center">
+                    <button id="btn-admin-reset" class="btn secondary hidden" style="color: var(--danger); border-color: var(--danger);">Tüm Tabloyu Sıfırla (Admin)</button>
                 </div>
             </div>
         </section>

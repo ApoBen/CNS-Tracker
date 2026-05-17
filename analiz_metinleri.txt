@@ -1,0 +1,33 @@
+CNS TRACKER - TEST SONUÇ ANALİZ METİNLERİ
+=========================================
+
+1. PVT (Psikomotor Teyakkuz Testi) Sonuçları
+-----------------------------------------
+A) Reaksiyon Süresi 250ms ve Altındaysa:
+   Başlık: Kusursuz Reaksiyon! 🟢
+   Metin:  Motor nöron ateşlemelerin zirvede. Uyaranlara verdiğin tepki süresi kusursuz ve çok hızlı.
+
+B) Reaksiyon Süresi 250ms - 350ms Arasındaysa:
+   Başlık: Normal Reaksiyon 🟡
+   Metin:  Sistemin uyanık ve sağlıklı. Reaksiyon sürelerin standart sınırlar içerisinde.
+
+C) Reaksiyon Süresi 350ms Üzerindeyse veya Çok Geciktiyse:
+   Başlık: CNS BİTKİN! 🔴
+   Metin:  Motor nöron ateşlemesi gecikiyor (Lapse). Merkezi sinir sistemin bitkin durumda ve tepki sürelerin çok uzamış.
+
+
+2. CPS (Tıklama Hızı) Testi Sonuçları
+-----------------------------------------
+Kullanıcının kendi profiline/geçmiş ortalamasına göre oran (Ratio) hesaplanır:
+
+A) Skor, Hedefin %95'i ve Üzerindeyse:
+   Başlık: Harika Durumda! 🟢
+   Metin:  Merkezi sinir sistemin tamamen dinlenmiş ve tepki sürelerin çok yüksek. Maksimum sinirsel aktivasyon sağlanıyor.
+
+B) Skor, Hedefin %85'i ile %95'i Arasındaysa:
+   Başlık: Normal Seviyede 🟡
+   Metin:  Merkezi sinir sistemin olağan durumunda. Herhangi bir yorgunluk veya belirgin yavaşlama belirtisi yok.
+
+C) Skor, Hedefin %85'inin Altındaysa:
+   Başlık: Yorgun Tespit Edildi 🔴
+   Metin:  Merkezi sinir sisteminde yavaşlama tespit edildi. Motor nöron uyarımında gecikmeler yaşanıyor, CNS yorgun.

@@ -332,3 +332,26 @@ header h2 { margin: 0; font-size: 1.5rem; }
     20%, 60% { transform: translateX(-10px); }
     40%, 80% { transform: translateX(10px); }
 }
+
+/* Leaderboard Specifics */
+.lb-rank-1 {
+    background: linear-gradient(90deg, rgba(250, 204, 21, 0.2), rgba(255,255,255,0.03)) !important;
+    border-left: 4px solid #facc15;
+}
+.lb-rank-2 {
+    background: linear-gradient(90deg, rgba(148, 163, 184, 0.2), rgba(255,255,255,0.03)) !important;
+    border-left: 4px solid #94a3b8;
+}
+.lb-rank-3 {
+    background: linear-gradient(90deg, rgba(180, 83, 9, 0.2), rgba(255,255,255,0.03)) !important;
+    border-left: 4px solid #b45309;
+}
+.lb-item-name {
+    font-weight: 800;
+    font-size: 1.1rem;
+    color: var(--text-main);
+}
+.lb-item-score {
+    font-size: 1.2rem;
+    font-weight: 800;
+}
