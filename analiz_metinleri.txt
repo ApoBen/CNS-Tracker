@@ -45,3 +45,18 @@ B) Skor 1500 - 2500 Arası:
 C) Skor 1500'in Altında (İsabetsiz veya Çok Yavaş):
    Başlık: Odak Kaybı / Titreme 🔴
    Metin:  Sistemde belirgin bir yavaşlama veya isabet sorunu var. Sinir sistemin bitkin, motor becerilerin ve nöral iletim zayıflamış. (Altında yüzdelik analiz gösterilir)
+
+
+4. Stroop Etkisi (Bilişsel Yük) Testi Sonuçları
+-----------------------------------------
+A) Skor 3000 ve Üzeri:
+   Başlık: Mükemmel Bilişsel Hız 🟢
+   Metin:  Ön lob ateşlemesi muazzam. Herhangi bir beyin sisi (brain fog) yok, bilişsel işlem süreci tamamen kusursuz.
+
+B) Skor 2000 - 3000 Arası:
+   Başlık: Normal Bilişsel Hız 🟡
+   Metin:  Bilişsel karar alma mekanizması standart seviyede. Frontal lob kararlı çalışıyor.
+
+C) Skor 2000'in Altında:
+   Başlık: Ağır Beyin Sisi 🔴
+   Metin:  Ağır BEYİN SİSİ tespit edildi. Frontal lob kelime/renk çelişkisini çözmekte çok yavaş kalıyor veya çok fazla hata yapıyor. CNS çok yorgun. (Hata yapıldıysa ekstra analiz gösterilir)

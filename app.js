@@ -56,6 +56,14 @@ const aimRemaining = document.getElementById('aim-remaining');
 const aimAccuracy = document.getElementById('aim-accuracy');
 const aimProMode = document.getElementById('aim-pro-mode');
 
+// Stroop Elements
+const stroopStartBtn = document.getElementById('stroop-start-btn');
+const stroopRemaining = document.getElementById('stroop-remaining');
+const stroopAccuracy = document.getElementById('stroop-accuracy');
+const stroopWordContainer = document.getElementById('stroop-word-container');
+const stroopWord = document.getElementById('stroop-word');
+const stroopButtons = document.getElementById('stroop-buttons');
+
 // Result Elements
 const resultScoreValue = document.getElementById('result-score-value');
 const resultScoreUnit = document.getElementById('result-score-unit');
@@ -75,6 +83,7 @@ const btnCloseLeaderboard = document.getElementById('btn-close-leaderboard');
 const lbTabPvt = document.getElementById('lb-tab-pvt');
 const lbTabCps = document.getElementById('lb-tab-cps');
 const lbTabAim = document.getElementById('lb-tab-aim');
+const lbTabStroop = document.getElementById('lb-tab-stroop');
 const lbLoading = document.getElementById('lb-loading');
 const leaderboardList = document.getElementById('leaderboard-list');
 const btnAdminReset = document.getElementById('btn-admin-reset');
@@ -93,6 +102,7 @@ let appState = {
 let cpsState = { isActive: false, clicks: 0, timeLeft: 5.0, timer: null };
 let pvtState = { isActive: false, attempt: 1, maxAttempts: 3, results: [], timerStart: 0, timeoutId: null, status: 'idle' };
 let aimState = { isActive: false, targetsHit: 0, targetsMissed: 0, bombsHit: 0, proMode: false, totalTargets: 10, times: [], lastSpawnTime: 0 };
+let stroopState = { isActive: false, currentRound: 0, totalRounds: 20, times: [], errors: 0, startTime: 0, targetColor: '' };
 
 const CPS_DURATION = 5.0;
 
@@ -192,6 +202,11 @@ function setupEventListeners() {
     aimStartBtn.addEventListener('mousedown', (e) => { e.stopPropagation(); startAimTest(e); });
     aimStartBtn.addEventListener('touchstart', (e) => { e.preventDefault(); e.stopPropagation(); startAimTest(e); }, { passive: false });
     aimStartBtn.addEventListener('click', (e) => { e.stopPropagation(); startAimTest(e); });
+    
+    stroopStartBtn.addEventListener('click', startStroopTest);
+    document.querySelectorAll('.stroop-btn').forEach(btn => {
+        btn.addEventListener('click', handleStroopChoice);
+    });
 
     btnFinish.addEventListener('click', () => {
         updateDashboard();
@@ -467,6 +482,88 @@ function endAimTest() {
     processResult(finalScore, 'aim');
 }
 
+// ---------------- STROOP TEST LOGIC ----------------
+const STROOP_COLORS = [
+    { name: 'KIRMIZI', hex: '#ef4444' },
+    { name: 'MAVİ', hex: '#3b82f6' },
+    { name: 'YEŞİL', hex: '#22c55e' },
+    { name: 'SARI', hex: '#eab308' }
+];
+
+function prepareStroopTest() {
+    stroopState = { isActive: false, currentRound: 0, totalRounds: 20, times: [], errors: 0, startTime: 0, targetColor: '' };
+    stroopRemaining.textContent = "20";
+    stroopAccuracy.textContent = "100";
+    stroopWordContainer.style.display = 'none';
+    stroopButtons.style.display = 'none';
+    stroopStartBtn.style.display = 'block';
+}
+
+function startStroopTest(e) {
+    if(e) e.stopPropagation();
+    stroopState.isActive = true;
+    stroopStartBtn.style.display = 'none';
+    stroopWordContainer.style.display = 'block';
+    stroopButtons.style.display = 'grid';
+    nextStroopRound();
+}
+
+function nextStroopRound() {
+    if (stroopState.currentRound >= stroopState.totalRounds) {
+        return endStroopTest();
+    }
+    
+    let textObj = STROOP_COLORS[Math.floor(Math.random() * STROOP_COLORS.length)];
+    let colorObj;
+    
+    if (Math.random() > 0.4) {
+        let others = STROOP_COLORS.filter(c => c.hex !== textObj.hex);
+        colorObj = others[Math.floor(Math.random() * others.length)];
+    } else {
+        colorObj = textObj;
+    }
+    
+    stroopState.targetColor = colorObj.hex;
+    stroopWord.textContent = textObj.name;
+    stroopWord.style.color = colorObj.hex;
+    
+    stroopState.startTime = performance.now();
+}
+
+function handleStroopChoice(e) {
+    if (!stroopState.isActive) return;
+    const clickedColor = e.target.getAttribute('data-color');
+    const rxTime = performance.now() - stroopState.startTime;
+    
+    stroopState.times.push(rxTime);
+    stroopState.currentRound++;
+    
+    if (clickedColor !== stroopState.targetColor) {
+        stroopState.errors++;
+        createRipple(e, document.getElementById('stroop-arena'), 0); 
+    }
+    
+    const acc = Math.round(((stroopState.currentRound - stroopState.errors) / stroopState.currentRound) * 100);
+    stroopRemaining.textContent = stroopState.totalRounds - stroopState.currentRound;
+    stroopAccuracy.textContent = acc;
+    
+    nextStroopRound();
+}
+
+function endStroopTest() {
+    stroopState.isActive = false;
+    stroopWordContainer.style.display = 'none';
+    stroopButtons.style.display = 'none';
+    
+    const avgTime = stroopState.times.reduce((a,b) => a+b, 0) / stroopState.times.length || 1;
+    const accuracy = (stroopState.totalRounds - stroopState.errors) / stroopState.totalRounds;
+    
+    let rawScore = (20000 / Math.max(avgTime, 200)) * 100 * accuracy;
+    let finalScore = Math.max(0, Math.round(rawScore - (stroopState.errors * 500)));
+    
+    processResult(finalScore, 'stroop');
+}
+
 // ---------------- COMMON LOGIC ----------------
 function createRipple(e, container, hue) {
     const rect = container.getBoundingClientRect();
@@ -564,6 +661,27 @@ function processResult(score, type) {
         }
         resultScoreValue.textContent = Math.round(score);
         resultScoreUnit.textContent = 'Puan';
+    } else if (type === 'stroop') {
+        const avgTime = stroopState.times.reduce((a,b) => a+b, 0) / stroopState.times.length || 1;
+        const accuracy = (stroopState.totalRounds - stroopState.errors) / stroopState.totalRounds;
+        
+        let causeText = "";
+        if (score < 2500 && stroopState.errors > 0) {
+            causeText = `<br><br><strong style="color:var(--danger)">Hata Analizi:</strong><br>Toplam ${stroopState.errors} renk çelişkisi hatası yapıldı. Frontal lob kararlarında bozulma var.`;
+        }
+
+        if (score >= 3000) {
+            statusClass = 'good'; statusText = 'Mükemmel Bilişsel Hız 🟢';
+            recText = 'Ön lob ateşlemesi muazzam. Herhangi bir beyin sisi (brain fog) yok, bilişsel işlem süreci tamamen kusursuz.';
+        } else if (score >= 2000) {
+            statusClass = 'normal'; statusText = 'Normal Bilişsel Hız 🟡';
+            recText = 'Bilişsel karar alma mekanizması standart seviyede. Frontal lob kararlı çalışıyor.' + causeText;
+        } else {
+            statusClass = 'fatigued'; statusText = 'Ağır Beyin Sisi 🔴';
+            recText = 'Ağır BEYİN SİSİ tespit edildi. Frontal lob kelime/renk çelişkisini çözmekte çok yavaş kalıyor veya çok fazla hata yapıyor. CNS çok yorgun.' + causeText;
+        }
+        resultScoreValue.textContent = Math.round(score);
+        resultScoreUnit.textContent = 'Puan';
     }
 
     resultScoreSection.className = `result-score score-${statusClass}`;
@@ -594,6 +712,9 @@ function updateDashboard() {
         statLast.textContent = history.length > 0 ? Math.round(history[0].score) : '--';
     } else if (type === 'aim') {
         statBaseline.textContent = '> 2500';
+        statLast.textContent = history.length > 0 ? Math.round(history[0].score) : '--';
+    } else if (type === 'stroop') {
+        statBaseline.textContent = '> 3000';
         statLast.textContent = history.length > 0 ? Math.round(history[0].score) : '--';
     }
 
@@ -688,8 +809,7 @@ async function syncLeaderboard(score, type, username) {
         
         if (i > -1) {
             const old = data[type][i].score;
-            // PVT düşük iyidir, CPS ve AIM yüksek iyidir
-            if ((type === 'pvt' && score < old) || (type === 'aim' && score > old) || (type === 'cps' && score > old)) {
+            if ((type === 'pvt' && score < old) || (type === 'aim' && score > old) || (type === 'cps' && score > old) || (type === 'stroop' && score > old)) {
                 data[type][i].score = score;
                 data[type][i].date = new Date().toISOString();
                 updated = true;
@@ -755,6 +875,7 @@ async function fetchAndRenderLeaderboard(type) {
             let scoreClass = '';
             if (type === 'pvt') scoreClass = item.score > 400 ? 'score-fatigued' : (item.score <= 300 ? 'score-good' : '');
             else if (type === 'aim') scoreClass = item.score < 1500 ? 'score-fatigued' : (item.score >= 2500 ? 'score-good' : '');
+            else if (type === 'stroop') scoreClass = item.score < 2000 ? 'score-fatigued' : (item.score >= 3000 ? 'score-good' : '');
             
             li.innerHTML = `
                 <div style="display:flex; align-items:center; gap: 10px;">
