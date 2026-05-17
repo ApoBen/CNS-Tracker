@@ -70,7 +70,7 @@ const leaderboardList = document.getElementById('leaderboard-list');
 const btnAdminReset = document.getElementById('btn-admin-reset');
 
 // Constants
-const JSONBLOB_URL = 'https://jsonblob.com/api/jsonBlob/019e34b7-3973-7b26-9d49-50d4e92b84ca';
+const JSONBLOB_URL = 'https://api.restful-api.dev/objects/ff8081819d82fab6019e34be3fe44891';
 let currentLbMode = 'pvt';
 
 // State
@@ -241,7 +241,7 @@ function setupEventListeners() {
                     await fetch(JSONBLOB_URL, {
                         method: 'PUT',
                         headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
-                        body: JSON.stringify({cps:[], pvt:[]})
+                        body: JSON.stringify({"name": "cns_tracker", "data": {cps:[], pvt:[]}})
                     });
                     alert("Başarıyla Sıfırlandı!");
                     btnAdminReset.textContent = "Tüm Tabloyu Sıfırla (Admin)";
@@ -455,10 +455,10 @@ function processResult(score, type) {
         resultScoreValue.textContent = score.toFixed(1);
         resultScoreUnit.textContent = 'CPS';
     } else {
-        if (score <= 250) {
+        if (score <= 300) {
             statusClass = 'good'; statusText = 'Kusursuz Reaksiyon! 🟢';
             recText = 'Motor nöron ateşlemelerin zirvede. Uyaranlara verdiğin tepki süresi kusursuz ve çok hızlı.';
-        } else if (score <= 350) {
+        } else if (score <= 400) {
             statusClass = 'normal'; statusText = 'Normal Reaksiyon 🟡';
             recText = 'Sistemin uyanık ve sağlıklı. Reaksiyon sürelerin standart sınırlar içerisinde.';
         } else {
@@ -491,7 +491,7 @@ function updateDashboard() {
         statBaseline.textContent = calculateCpsBaseline().toFixed(1);
         statLast.textContent = history.length > 0 ? history[0].score.toFixed(1) : '--';
     } else {
-        statBaseline.textContent = '< 250';
+        statBaseline.textContent = '< 300';
         statLast.textContent = history.length > 0 ? Math.round(history[0].score) : '--';
     }
 
@@ -554,7 +554,8 @@ function renderChart() {
 async function syncLeaderboard(score, type, username) {
     try {
         const res = await fetch(JSONBLOB_URL);
-        const data = await res.json();
+        const json = await res.json();
+        const data = json.data;
         
         const i = data[type].findIndex(u => u.username === username);
         let updated = false;
@@ -575,7 +576,7 @@ async function syncLeaderboard(score, type, username) {
             await fetch(JSONBLOB_URL, {
                 method: 'PUT',
                 headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
-                body: JSON.stringify(data)
+                body: JSON.stringify({"name": "cns_tracker", "data": data})
             });
         }
     } catch (e) {
@@ -596,8 +597,8 @@ async function fetchAndRenderLeaderboard(type) {
 
     try {
         const res = await fetch(JSONBLOB_URL);
-        const data = await res.json();
-        let list = data[type] || [];
+        const json = await res.json();
+        let list = json.data[type] || [];
         
         if (type === 'pvt') list.sort((a, b) => a.score - b.score);
         else list.sort((a, b) => b.score - a.score);
@@ -626,7 +627,7 @@ async function fetchAndRenderLeaderboard(type) {
                     <span style="font-size: 1.5rem; width:35px; text-align:center;">${rankMedal}</span>
                     <span class="lb-item-name">${item.username}</span>
                 </div>
-                <span class="lb-item-score ${type==='pvt'&&item.score>350?'score-fatigued':type==='pvt'&&item.score<=250?'score-good':''}">${valStr}</span>
+                <span class="lb-item-score ${type==='pvt'&&item.score>400?'score-fatigued':type==='pvt'&&item.score<=300?'score-good':''}">${valStr}</span>
             `;
             leaderboardList.appendChild(li);
         });

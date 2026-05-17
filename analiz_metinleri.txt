@@ -3,15 +3,15 @@ CNS TRACKER - TEST SONUÇ ANALİZ METİNLERİ
 
 1. PVT (Psikomotor Teyakkuz Testi) Sonuçları
 -----------------------------------------
-A) Reaksiyon Süresi 250ms ve Altındaysa:
+A) Reaksiyon Süresi 300ms ve Altındaysa:
    Başlık: Kusursuz Reaksiyon! 🟢
    Metin:  Motor nöron ateşlemelerin zirvede. Uyaranlara verdiğin tepki süresi kusursuz ve çok hızlı.
 
-B) Reaksiyon Süresi 250ms - 350ms Arasındaysa:
+B) Reaksiyon Süresi 300ms - 400ms Arasındaysa:
    Başlık: Normal Reaksiyon 🟡
    Metin:  Sistemin uyanık ve sağlıklı. Reaksiyon sürelerin standart sınırlar içerisinde.
 
-C) Reaksiyon Süresi 350ms Üzerindeyse veya Çok Geciktiyse:
+C) Reaksiyon Süresi 400ms Üzerindeyse veya Çok Geciktiyse:
    Başlık: CNS BİTKİN! 🔴
    Metin:  Motor nöron ateşlemesi gecikiyor (Lapse). Merkezi sinir sistemin bitkin durumda ve tepki sürelerin çok uzamış.
 
