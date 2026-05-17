@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>CNS Tracker - Sinir Sistemi Testi</title>
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#0f172a">
+    <link rel="icon" href="icon.svg" type="image/svg+xml">
+    <meta name="description" content="Tıklama hızınızı (CPS) ölçerek Merkezi Sinir Sistemi (CNS) yorgunluğunuzu analiz edin ve antrenman yoğunluğunuzu belirleyin.">
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+    <div id="app-container">
+        
+        <!-- ONBOARDING / SETTINGS SCREEN -->
+        <section id="screen-onboarding" class="screen active">
+            <div class="glass-card">
+                <h1 id="onboarding-title">Hoş Geldin!</h1>
+                <p>Merkezi Sinir Sistemi (CNS) analizini doğru yapabilmemiz için seviyeni bilmemiz gerekiyor.</p>
+                
+                <div class="form-group">
+                    <label for="sport-level">Spor / Egzersiz Seviyen</label>
+                    <select id="sport-level">
+                        <option value="low">Düşük (Haftada 0-1 gün)</option>
+                        <option value="mid" selected>Orta (Haftada 2-4 gün)</option>
+                        <option value="high">Yüksek (Düzenli / İleri Seviye)</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="game-level">Oyunculuk Seviyen (Mouse/Refleks)</label>
+                    <select id="game-level">
+                        <option value="low">Düşük (Oyun oynamam)</option>
+                        <option value="mid" selected>Orta (Ara sıra oynarım)</option>
+                        <option value="high">Yüksek (Rekabetçi FPS/MOBA)</option>
+                    </select>
+                </div>
+
+                <button id="btn-save-profile" class="btn primary">Kaydet ve Başla</button>
+                <button id="btn-cancel-settings" class="btn secondary hidden">İptal</button>
+            </div>
+        </section>
+
+        <!-- DASHBOARD SCREEN -->
+        <section id="screen-dashboard" class="screen hidden">
+            <header>
+                <h2>CNS Tracker</h2>
+                <div>
+                    <button id="btn-chart" class="icon-btn" aria-label="Grafikler">📊</button>
+                    <button id="btn-settings" class="icon-btn" aria-label="Ayarlar">⚙️</button>
+                </div>
+            </header>
+
+            <div class="test-selector mt-l">
+                <button id="btn-select-pvt" class="test-tab active">PVT (Reaksiyon)</button>
+                <button id="btn-select-cps" class="test-tab">CPS (Hız)</button>
+            </div>
+
+            <div class="glass-card text-center mt-l">
+                <h3 id="dashboard-test-title">PVT Testi</h3>
+                <div class="stats-grid">
+                    <div class="stat-box">
+                        <span class="stat-label">Beklenen</span>
+                        <strong id="stat-baseline" class="stat-value">--</strong>
+                    </div>
+                    <div class="stat-box">
+                        <span class="stat-label">Son Test</span>
+                        <strong id="stat-last" class="stat-value">--</strong>
+                    </div>
+                </div>
+                
+                <div class="action-area">
+                    <p id="dashboard-instruction" class="instruction-text">Rastgele yanan ışığa en hızlı şekilde tepki ver.</p>
+                    <button id="btn-start-test" class="btn giant pulse-anim">Teste Başla</button>
+                </div>
+            </div>
+
+            <div class="history-area">
+                <h4>Geçmiş Testler</h4>
+                <ul id="history-list">
+                    <!-- JS ile doldurulacak -->
+                </ul>
+            </div>
+        </section>
+
+        <!-- TEST SCREEN -->
+        <section id="screen-test" class="screen hidden">
+            <div class="test-header">
+                <div class="timer-display">Kalan Süre: <span id="time-left">5.0</span>s</div>
+                <div class="click-display">Tıklama: <span id="click-count">0</span></div>
+            </div>
+            
+            <button id="click-area" class="click-area">
+                <span id="click-instruction">BAŞLAMAK İÇİN TIKLA</span>
+            </button>
+        </section>
+
+        <!-- PVT TEST SCREEN -->
+        <section id="screen-pvt" class="screen hidden">
+            <div class="test-header text-center">
+                <h2 id="pvt-title">Hazırlan...</h2>
+                <p>Deneme: <span id="pvt-attempt">1</span> / <span id="pvt-max-attempts">3</span></p>
+            </div>
+            
+            <button id="pvt-area" class="click-area pvt-waiting">
+                <span id="pvt-instruction">BEKLE</span>
+            </button>
+        </section>
+
+        <!-- RESULT SCREEN -->
+        <section id="screen-result" class="screen hidden">
+            <div class="glass-card text-center">
+                <h2>Test Sonucu</h2>
+                <div class="result-score">
+                    <span id="result-score-value" class="giant-score">0.0</span>
+                    <span id="result-score-unit" class="unit">MS</span>
+                </div>
+                
+                <div class="result-analysis mt-l">
+                    <h3 id="result-fatigue-status" class="status-title">Analiz Ediliyor...</h3>
+                    <p id="result-recommendation" class="recommendation-text"></p>
+                </div>
+
+                <div class="mt-xl">
+                    <button id="btn-finish" class="btn primary">Ana Ekrana Dön</button>
+                </div>
+            </div>
+        </section>
+
+        <!-- CHART SCREEN -->
+        <section id="screen-chart" class="screen hidden">
+            <header>
+                <h2>Performans Grafiği</h2>
+                <button id="btn-close-chart" class="icon-btn">✖</button>
+            </header>
+            
+            <div class="glass-card mt-l" style="padding: 1rem; flex:1; display:flex; flex-direction:column;">
+                <div class="chart-controls" style="display:flex; gap:10px; margin-bottom:1rem;">
+                    <select id="chart-type-filter" style="flex:1;">
+                        <option value="pvt">PVT (Reaksiyon)</option>
+                        <option value="cps">CPS (Tıklama Hızı)</option>
+                    </select>
+                    <select id="chart-time-filter" style="flex:1;">
+                        <option value="10">Son 10</option>
+                        <option value="30">Son 30</option>
+                        <option value="all">Tümü</option>
+                    </select>
+                </div>
+                
+                <div class="chart-container" style="position: relative; flex:1; min-height:300px; width:100%;">
+                    <canvas id="performanceChart"></canvas>
+                </div>
+            </div>
+        </section>
+
+    </div>
+
+    <script src="app.js"></script>
+    <script>
+      if ('serviceWorker' in navigator) {
+        window.addEventListener('load', () => {
+          navigator.serviceWorker.register('./sw.js').then(reg => {
+            console.log('ServiceWorker registered:', reg.scope);
+          }).catch(err => {
+            console.log('ServiceWorker registration failed:', err);
+          });
+        });
+      }
+    </script>
+</body>
+</html>

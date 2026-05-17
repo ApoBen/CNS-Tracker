@@ -1,0 +1,17 @@
+{
+  "name": "CNS Tracker - Sinir Sistemi Testi",
+  "short_name": "CNS Tracker",
+  "description": "Merkezi Sinir Sistemi (CNS) yorgunluğunuzu analiz eden ve antrenman tavsiyesi veren profesyonel araç.",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "background_color": "#0f172a",
+  "theme_color": "#0f172a",
+  "icons": [
+    {
+      "src": "icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}
