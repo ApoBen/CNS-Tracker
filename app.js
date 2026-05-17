@@ -54,6 +54,7 @@ const aimArena = document.getElementById('aim-arena');
 const aimStartBtn = document.getElementById('aim-start-btn');
 const aimRemaining = document.getElementById('aim-remaining');
 const aimAccuracy = document.getElementById('aim-accuracy');
+const aimProMode = document.getElementById('aim-pro-mode');
 
 // Result Elements
 const resultScoreValue = document.getElementById('result-score-value');
@@ -91,7 +92,7 @@ let appState = {
 
 let cpsState = { isActive: false, clicks: 0, timeLeft: 5.0, timer: null };
 let pvtState = { isActive: false, attempt: 1, maxAttempts: 3, results: [], timerStart: 0, timeoutId: null, status: 'idle' };
-let aimState = { isActive: false, targetsHit: 0, targetsMissed: 0, totalTargets: 10, times: [], lastSpawnTime: 0 };
+let aimState = { isActive: false, targetsHit: 0, targetsMissed: 0, bombsHit: 0, proMode: false, totalTargets: 10, times: [], lastSpawnTime: 0 };
 
 const CPS_DURATION = 5.0;
 
@@ -351,7 +352,7 @@ function endPvtTest() {
 
 // ---------------- AIM TEST LOGIC ----------------
 function prepareAimTest() {
-    aimState = { isActive: false, targetsHit: 0, targetsMissed: 0, totalTargets: 10, times: [], lastSpawnTime: 0 };
+    aimState = { isActive: false, targetsHit: 0, targetsMissed: 0, bombsHit: 0, proMode: aimProMode.checked, totalTargets: 10, times: [], lastSpawnTime: 0 };
     aimRemaining.textContent = "10";
     aimAccuracy.textContent = "100";
     aimArena.innerHTML = '';
@@ -374,7 +375,7 @@ function spawnAimTarget() {
     const target = document.createElement('div');
     target.className = 'aim-target';
     
-    const padding = 30; // half of target size
+    const padding = 35; 
     const rect = aimArena.getBoundingClientRect();
     const maxX = rect.width - padding * 2;
     const maxY = rect.height - padding * 2;
@@ -389,7 +390,41 @@ function spawnAimTarget() {
     target.addEventListener('touchstart', (e) => { e.preventDefault(); handleAimHit(e); }, {passive: false});
     
     aimArena.appendChild(target);
+    
+    if (aimState.proMode && Math.random() < 0.3) {
+        spawnAimBomb(x, y, maxX, maxY, padding);
+    }
+    
     aimState.lastSpawnTime = performance.now();
+}
+
+function spawnAimBomb(tx, ty, maxX, maxY, padding) {
+    const bomb = document.createElement('div');
+    bomb.className = 'aim-bomb';
+    
+    let bx, by, distance, attempts = 0;
+    do {
+        bx = Math.max(padding, Math.floor(Math.random() * maxX) + padding);
+        by = Math.max(padding, Math.floor(Math.random() * maxY) + padding);
+        distance = Math.sqrt(Math.pow(bx - tx, 2) + Math.pow(by - ty, 2));
+        attempts++;
+    } while(distance < 80 && attempts < 10);
+    
+    bomb.style.left = `${bx}px`;
+    bomb.style.top = `${by}px`;
+    
+    bomb.addEventListener('mousedown', handleAimBombHit);
+    bomb.addEventListener('touchstart', (e) => { e.preventDefault(); handleAimBombHit(e); }, {passive: false});
+    
+    aimArena.appendChild(bomb);
+}
+
+function handleAimBombHit(e) {
+    if (!aimState.isActive) return;
+    e.stopPropagation();
+    aimState.bombsHit++;
+    createRipple(e, aimArena, 0); 
+    e.target.remove(); 
 }
 
 function handleAimHit(e) {
@@ -421,8 +456,8 @@ function updateAimUI() {
 function endAimTest() {
     aimState.isActive = false;
     const avgTime = aimState.times.reduce((a,b) => a+b, 0) / aimState.times.length || 0;
-    // Penalty: +150ms per miss
-    const finalScore = avgTime + (aimState.targetsMissed * 150);
+    // Penalty: +150ms per miss, +500ms per bomb hit
+    const finalScore = avgTime + (aimState.targetsMissed * 150) + (aimState.bombsHit * 500);
     processResult(finalScore, 'aim');
 }
 
@@ -508,11 +543,13 @@ function processResult(score, type) {
     resultFatigueStatus.textContent = statusText;
     resultRecommendation.textContent = recText;
 
-    appState.history.unshift({ date: new Date().toISOString(), type, score, status: statusClass });
+    appState.history.unshift({ date: new Date().toISOString(), type, score, status: statusClass, proMode: type === 'aim' ? aimState.proMode : false });
     saveState();
 
     if (appState.profile && appState.profile.leaderboardOptIn) {
-        syncLeaderboard(score, type, appState.profile.username);
+        if (!(type === 'aim' && aimState.proMode)) {
+            syncLeaderboard(score, type, appState.profile.username);
+        }
     }
 
     showScreen('result');
@@ -546,9 +583,12 @@ function updateDashboard() {
         if (type === 'cps') valStr = `${item.score.toFixed(1)} CPS`;
         else if (type === 'pvt') valStr = `${Math.round(item.score)} ms`;
         
+        let labelAdd = '';
+        if (type === 'aim' && item.proMode) labelAdd = ' <span style="font-size:0.6rem; color:var(--danger); border:1px solid var(--danger); border-radius:4px; padding:1px 3px; vertical-align:middle; margin-left:4px;">PRO</span>';
+
         const li = document.createElement('li');
         li.className = 'history-item';
-        li.innerHTML = `<span class="history-date">${dateStr}</span><span class="history-score score-${item.status}">${valStr}</span>`;
+        li.innerHTML = `<span class="history-date">${dateStr}${labelAdd}</span><span class="history-score score-${item.status}">${valStr}</span>`;
         historyList.appendChild(li);
     });
 }

@@ -376,3 +376,30 @@ header h2 { margin: 0; font-size: 1.5rem; }
     0% { transform: translate(-50%, -50%) scale(0); opacity: 0; }
     100% { transform: translate(-50%, -50%) scale(1); opacity: 1; }
 }
+
+.aim-bomb {
+    position: absolute;
+    width: 65px;
+    height: 65px;
+    background: radial-gradient(circle at 30% 30%, #475569, #0f172a);
+    border-radius: 50%;
+    border: 3px dashed #ef4444;
+    box-shadow: 0 0 20px rgba(0,0,0,0.8), inset 0 0 10px rgba(239,68,68,0.5);
+    cursor: crosshair;
+    transform: translate(-50%, -50%);
+    animation: bombShake 0.3s infinite alternate ease-in-out;
+    z-index: 1;
+    touch-action: manipulation;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.8rem;
+}
+.aim-bomb::after {
+    content: '💣';
+}
+
+@keyframes bombShake {
+    0% { transform: translate(-50%, -50%) rotate(-8deg) scale(0.95); opacity: 0.8; }
+    100% { transform: translate(-50%, -50%) rotate(8deg) scale(1.05); opacity: 1; }
+}
