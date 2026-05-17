@@ -576,8 +576,8 @@ function endStroopTest() {
     const avgTime = stroopState.times.reduce((a,b) => a+b, 0) / stroopState.times.length || 1;
     const accuracy = (stroopState.totalRounds - stroopState.errors) / stroopState.totalRounds;
     
-    let rawScore = (20000 / Math.max(avgTime, 200)) * 100 * accuracy;
-    let finalScore = Math.max(0, Math.round(rawScore - (stroopState.errors * 500)));
+    let rawScore = (25000 / Math.max(avgTime, 200)) * 100 * accuracy;
+    let finalScore = Math.max(0, Math.round(rawScore - (stroopState.errors * 200)));
     
     processResult(finalScore, 'stroop');
 }
@@ -688,10 +688,10 @@ function processResult(score, type) {
             causeText = `<br><br><strong style="color:var(--danger)">Hata Analizi:</strong><br>Toplam ${stroopState.errors} renk çelişkisi hatası yapıldı. Frontal lob kararlarında bozulma var.`;
         }
 
-        if (score >= 3000) {
+        if (score >= 2500) {
             statusClass = 'good'; statusText = 'Mükemmel Bilişsel Hız 🟢';
             recText = 'Ön lob ateşlemesi muazzam. Herhangi bir beyin sisi (brain fog) yok, bilişsel işlem süreci tamamen kusursuz.';
-        } else if (score >= 2000) {
+        } else if (score >= 1500) {
             statusClass = 'normal'; statusText = 'Normal Bilişsel Hız 🟡';
             recText = 'Bilişsel karar alma mekanizması standart seviyede. Frontal lob kararlı çalışıyor.' + causeText;
         } else {
@@ -732,7 +732,7 @@ function updateDashboard() {
         statBaseline.textContent = '> 2500';
         statLast.textContent = history.length > 0 ? Math.round(history[0].score) : '--';
     } else if (type === 'stroop') {
-        statBaseline.textContent = '> 3000';
+        statBaseline.textContent = '> 2500';
         statLast.textContent = history.length > 0 ? Math.round(history[0].score) : '--';
     }
 
@@ -894,7 +894,7 @@ async function fetchAndRenderLeaderboard(type) {
             let scoreClass = '';
             if (type === 'pvt') scoreClass = item.score > 400 ? 'score-fatigued' : (item.score <= 300 ? 'score-good' : '');
             else if (type === 'aim') scoreClass = item.score < 1500 ? 'score-fatigued' : (item.score >= 2500 ? 'score-good' : '');
-            else if (type === 'stroop') scoreClass = item.score < 2000 ? 'score-fatigued' : (item.score >= 3000 ? 'score-good' : '');
+            else if (type === 'stroop') scoreClass = item.score < 1500 ? 'score-fatigued' : (item.score >= 2500 ? 'score-good' : '');
             
             li.innerHTML = `
                 <div style="display:flex; align-items:center; gap: 10px;">

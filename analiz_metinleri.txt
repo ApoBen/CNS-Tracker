@@ -49,14 +49,14 @@ C) Skor 1500'in Altında (İsabetsiz veya Çok Yavaş):
 
 4. Stroop Etkisi (Bilişsel Yük) Testi Sonuçları
 -----------------------------------------
-A) Skor 3000 ve Üzeri:
+A) Skor 2500 ve Üzeri:
    Başlık: Mükemmel Bilişsel Hız 🟢
    Metin:  Ön lob ateşlemesi muazzam. Herhangi bir beyin sisi (brain fog) yok, bilişsel işlem süreci tamamen kusursuz.
 
-B) Skor 2000 - 3000 Arası:
+B) Skor 1500 - 2500 Arası:
    Başlık: Normal Bilişsel Hız 🟡
    Metin:  Bilişsel karar alma mekanizması standart seviyede. Frontal lob kararlı çalışıyor.
 
-C) Skor 2000'in Altında:
+C) Skor 1500'in Altında:
    Başlık: Ağır Beyin Sisi 🔴
-   Metin:  Ağır BEYİN SİSİ tespit edildi. Frontal lob kelime/renk çelişkisini çözmekte çok yavaş kalıyor veya çok fazla hata yapıyor. CNS çok yorgun. (Hata yapıldıysa ekstra analiz gösterilir)
+   Metin:  Ağır BEYİN SİSİ tespit edildi. Frontal lob kelime/renk çelişkisini çözmekte çok yavaş kalıyor veya çok fazla hata yapıyor. CNS çok yorgun.
