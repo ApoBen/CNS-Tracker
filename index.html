@@ -20,6 +20,19 @@
             <div class="glass-card">
                 <h1 id="onboarding-title">Hoş Geldin!</h1>
                 <p>Merkezi Sinir Sistemi (CNS) analizini doğru yapabilmemiz için seviyeni bilmemiz gerekiyor.</p>
+
+                <!-- Liderlik ve Kullanıcı Adı (Başta) -->
+                <div class="form-group leaderboard-optin" style="margin-bottom: 1.5rem; padding-bottom: 1.2rem; border-bottom: 1px solid rgba(255,255,255,0.1);">
+                    <label style="display:flex; align-items:center; gap: 10px; cursor: pointer;">
+                        <input type="checkbox" id="leaderboard-checkbox" style="width: 20px; height: 20px;">
+                        <span>Liderlik Tablosuna Katıl (Dünya Sıralaması)</span>
+                    </label>
+                    
+                    <div id="username-container" class="hidden mt-l">
+                        <label for="username-input">Kullanıcı Adı (Nickname)</label>
+                        <input type="text" id="username-input" placeholder="Örn: Aslan Parçası" maxlength="40" style="width:100%; padding: 12px; border-radius: 8px; background: rgba(15,23,42,0.8); border: 1px solid rgba(255,255,255,0.1); color: white; outline: none; margin-top: 5px;">
+                    </div>
+                </div>
                 
                 <div class="form-group">
                     <label for="sport-level">Spor / Egzersiz Seviyen</label>
@@ -39,19 +52,15 @@
                     </select>
                 </div>
 
-                <div class="form-group leaderboard-optin" style="margin-top: 2rem; padding-top: 1rem; border-top: 1px solid rgba(255,255,255,0.1);">
+                <!-- Animasyonları Kapatma Switch'i -->
+                <div class="form-group" style="margin-top: 1.5rem; padding-top: 1rem; border-top: 1px solid rgba(255,255,255,0.05);">
                     <label style="display:flex; align-items:center; gap: 10px; cursor: pointer;">
-                        <input type="checkbox" id="leaderboard-checkbox" style="width: 20px; height: 20px;">
-                        <span>Liderlik Tablosuna Katıl (Dünya Sıralaması)</span>
+                        <input type="checkbox" id="animations-checkbox" checked style="width: 20px; height: 20px;">
+                        <span>Görsel Efektler ve Animasyonlar Açık</span>
                     </label>
-                    
-                    <div id="username-container" class="hidden mt-l">
-                        <label for="username-input">Kullanıcı Adı (Nickname)</label>
-                        <input type="text" id="username-input" placeholder="Örn: Aslan Parçası" maxlength="20" style="width:100%; padding: 12px; border-radius: 8px; background: rgba(15,23,42,0.8); border: 1px solid rgba(255,255,255,0.1); color: white; outline: none; margin-top: 5px;">
-                    </div>
                 </div>
 
-                <button id="btn-save-profile" class="btn primary" style="margin-top: 1rem;">Kaydet ve Başla</button>
+                <button id="btn-save-profile" class="btn primary" style="margin-top: 1.5rem;">Kaydet ve Başla</button>
                 <button id="btn-cancel-settings" class="btn secondary hidden">İptal</button>
             </div>
         </section>
@@ -181,16 +190,16 @@
 
         <!-- CORSI SCREEN -->
         <section id="screen-corsi" class="screen hidden">
-            <div class="test-header text-center glass-card" style="margin-bottom: 20px; padding: 15px;">
-                <h2 id="corsi-title" style="margin: 0 0 5px 0;">Corsi Hafıza Testi</h2>
-                <div style="display:flex; justify-content: space-between; align-items:center; margin-top:10px; font-size: 1rem; font-weight: 600;">
+            <div class="test-header text-center glass-card" style="margin-bottom: 12px; padding: 10px 15px;">
+                <h2 id="corsi-title" style="margin: 0 0 2px 0; font-size: 1.5rem;">Corsi Hafıza Testi</h2>
+                <div style="display:flex; justify-content: space-between; align-items:center; margin-top:6px; font-size: 0.95rem; font-weight: 600;">
                     <div id="corsi-mode-indicator" style="color: var(--accent-primary);">Mod: Düz</div>
-                    <div id="corsi-status-badge" class="corsi-badge watching">İZLE</div>
+                    <div id="corsi-status-badge" class="corsi-badge watching" style="padding: 2px 8px; font-size: 0.75rem;">İZLE</div>
                     <div>Dizi: <span id="corsi-length" style="color: var(--success);">3</span></div>
                 </div>
             </div>
             
-            <div id="corsi-arena" style="flex:1; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:20px; position:relative; overflow:hidden; border-radius: 24px; border: 2px solid rgba(255,255,255,0.05); background: rgba(0,0,0,0.3); box-shadow: inset 0 0 30px rgba(0,0,0,0.5); padding: 20px; touch-action:none;">
+            <div id="corsi-arena" style="flex:1; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:10px; position:relative; overflow:hidden; border-radius: 24px; border: 2px solid rgba(255,255,255,0.05); background: rgba(0,0,0,0.3); box-shadow: inset 0 0 30px rgba(0,0,0,0.5); padding: 15px; touch-action:none;">
                 
                 <button id="corsi-start-btn" class="btn giant pulse-anim" style="position:absolute; top:50%; left:50%; transform:translate(-50%,-50%); z-index:5;">BAŞLA</button>
                 

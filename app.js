@@ -19,6 +19,7 @@ const btnSaveProfile = document.getElementById('btn-save-profile');
 const btnCancelSettings = document.getElementById('btn-cancel-settings');
 const onboardingTitle = document.getElementById('onboarding-title');
 const leaderboardCheckbox = document.getElementById('leaderboard-checkbox');
+const animationsCheckbox = document.getElementById('animations-checkbox');
 const usernameContainer = document.getElementById('username-container');
 const usernameInput = document.getElementById('username-input');
 
@@ -127,9 +128,15 @@ let corsiState = { isActive: false, mode: 'forward', sequence: [], userSequence:
 
 const CPS_DURATION = 5.0;
 
+function applyAnimationState() {
+    const enabled = !appState.profile || appState.profile.animationsEnabled !== false;
+    document.body.classList.toggle('no-animations', !enabled);
+}
+
 // Init
 function init() {
     loadState();
+    applyAnimationState();
     if (!appState.profile) {
         showScreen('onboarding');
     } else {
@@ -170,9 +177,11 @@ function setupEventListeners() {
             sport: sportSelect.value, 
             game: gameSelect.value,
             leaderboardOptIn: leaderboardCheckbox.checked,
-            username: leaderboardCheckbox.checked ? usernameInput.value.trim() || 'Sporcu_' + Math.floor(Math.random()*1000) : ''
+            username: leaderboardCheckbox.checked ? usernameInput.value.trim() || 'Sporcu_' + Math.floor(Math.random()*1000) : '',
+            animationsEnabled: animationsCheckbox.checked
         };
         saveState();
+        applyAnimationState();
         updateDashboard();
         showScreen('dashboard');
     });
@@ -184,6 +193,7 @@ function setupEventListeners() {
         sportSelect.value = appState.profile.sport;
         gameSelect.value = appState.profile.game;
         leaderboardCheckbox.checked = appState.profile.leaderboardOptIn;
+        animationsCheckbox.checked = appState.profile.animationsEnabled !== false;
         if(leaderboardCheckbox.checked) {
             usernameContainer.classList.remove('hidden');
             usernameInput.value = appState.profile.username;
@@ -796,6 +806,7 @@ function endCorsiTest() {
 
 // ---------------- COMMON LOGIC ----------------
 function createRipple(e, container, hue) {
+    if (appState.profile && appState.profile.animationsEnabled === false) return;
     const rect = container.getBoundingClientRect();
     const clientX = e.clientX || (e.touches && e.touches.length > 0 ? e.touches[0].clientX : rect.left + rect.width / 2);
     const clientY = e.clientY || (e.touches && e.touches.length > 0 ? e.touches[0].clientY : rect.top + rect.height / 2);
