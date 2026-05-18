@@ -287,9 +287,8 @@ header h2 { margin: 0; font-size: 1.5rem; }
     background: rgba(0,0,0,0.3);
     border-radius: var(--radius-md);
     padding: 4px;
-    overflow-x: auto;
-    scrollbar-width: none; /* Hide scrollbar Firefox */
-    -ms-overflow-style: none; /* Hide scrollbar IE/Edge */
+    flex-wrap: wrap;
+    gap: 4px;
 }
 .test-selector::-webkit-scrollbar {
     display: none; /* Hide scrollbar Chrome/Safari */
@@ -299,7 +298,8 @@ header h2 { margin: 0; font-size: 1.5rem; }
     background: transparent;
     border: none;
     color: var(--text-muted);
-    padding: 10px 16px;
+    padding: 8px 12px;
+    font-size: 0.9rem;
     font-family: inherit;
     font-weight: 600;
     cursor: pointer;
@@ -373,7 +373,7 @@ header h2 { margin: 0; font-size: 1.5rem; }
     box-shadow: 0 0 15px rgba(239, 68, 68, 0.6), inset 0 0 10px rgba(0,0,0,0.5);
     cursor: crosshair;
     transform: translate(-50%, -50%);
-    animation: popIn 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    animation: popIn 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275), slowDrift 8s ease-in-out 0.2s infinite alternate;
     z-index: 2;
     touch-action: manipulation;
 }
@@ -381,6 +381,14 @@ header h2 { margin: 0; font-size: 1.5rem; }
 @keyframes popIn {
     0% { transform: translate(-50%, -50%) scale(0); opacity: 0; }
     100% { transform: translate(-50%, -50%) scale(1); opacity: 1; }
+}
+
+@keyframes slowDrift {
+    0% { transform: translate(-50%, -50%) translate(0, 0) scale(1); }
+    25% { transform: translate(-50%, -50%) translate(15px, -15px) scale(1.05); }
+    50% { transform: translate(-50%, -50%) translate(-10px, 20px) scale(0.95); }
+    75% { transform: translate(-50%, -50%) translate(-20px, -10px) scale(1.02); }
+    100% { transform: translate(-50%, -50%) translate(0, 0) scale(1); }
 }
 
 .aim-bomb {

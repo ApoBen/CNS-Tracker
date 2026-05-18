@@ -304,13 +304,12 @@
 
     <script src="app.js"></script>
     <script>
+      // Service worker disabled to prevent aggressive caching and ensure live updates
       if ('serviceWorker' in navigator) {
-        window.addEventListener('load', () => {
-          navigator.serviceWorker.register('./sw.js').then(reg => {
-            console.log('ServiceWorker registered:', reg.scope);
-          }).catch(err => {
-            console.log('ServiceWorker registration failed:', err);
-          });
+        navigator.serviceWorker.getRegistrations().then(function(registrations) {
+          for(let registration of registrations) {
+            registration.unregister();
+          }
         });
       }
     </script>
