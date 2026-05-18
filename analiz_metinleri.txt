@@ -67,8 +67,8 @@ C) Skor 1500'in Altında:
 
 STAGE 1: Düz Hafıza (Forward Corsi)
 A) Skor 5 Kare ve Üzeri:
-   Başlık: Harika Hafıza Torku! 🟢
-   Metin:  Ön lob ve kısa süreli hafıza torkun muazzam seviyede. Merkezi sinir sistemin tamamen dinlenmiş ve yüksek bilişsel performansa hazır.
+   Başlık: Harika Hafıza Kapasitesi! 🟢
+   Metin:  Ön lob ve kısa süreli hafıza kapasiten muazzam seviyede. Merkezi sinir sistemin tamamen dinlenmiş ve yüksek bilişsel performansa hazır.
 
 B) Skor 4 Kare:
    Başlık: Sınırda Bellek Performansı 🟡
@@ -86,7 +86,7 @@ A) Skor 5 Kare ve Üzeri:
 
 B) Skor 3 veya 4 Kare:
    Başlık: Standart Bilişsel Performans 🟡
-   Metin:  Çalışma belleği çevirme kapasiten normal seviyede. Bilişsel tork standart sınırlar içerisinde işliyor.
+   Metin:  Çalışma belleği çevirme kapasiten normal seviyede. Bilişsel kapasite standart sınırlar içerisinde işliyor.
 
 C) Skor 3 Karenin Altındaysa (< 3):
    Başlık: AŞIRI BİLİŞSEL YÜK / BİTKİNLİK! 🔴

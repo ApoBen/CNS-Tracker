@@ -849,15 +849,15 @@ function processResult(score, type) {
                 recText = 'Zihinsel çevirme ve prefrontal korteks işlemci performansın kusursuz! Yüksek bilişsel yük altında bile muazzam bir odak ve çalışma belleğine sahipsin.';
             } else if (score >= 3) {
                 statusClass = 'normal'; statusText = 'Standart Bilişsel Performans 🟡';
-                recText = 'Çalışma belleği çevirme kapasiten normal seviyede. Bilişsel tork standart sınırlar içerisinde işliyor.';
+                recText = 'Çalışma belleği çevirme kapasiten normal seviyede. Bilişsel kapasite standart sınırlar içerisinde işliyor.';
             } else {
                 statusClass = 'fatigued'; statusText = 'AŞIRI BİLİŞSEL YÜK / BİTKİNLİK! 🔴';
                 recText = 'Prefrontal korteks hafıza çevriminde yetersiz kalıyor. Ağır beyin sisi ve zihinsel bitkinlik yaşanıyor olabilir. CNS dinlenmeye muhtaç! 🚨';
             }
         } else {
             if (score >= 5) {
-                statusClass = 'good'; statusText = 'Harika Hafıza Torku! 🟢';
-                recText = 'Ön lob ve kısa süreli hafıza torkun muazzam seviyede. Merkezi sinir sistemin tamamen dinlenmiş ve yüksek bilişsel performansa hazır.';
+                statusClass = 'good'; statusText = 'Harika Hafıza Kapasitesi! 🟢';
+                recText = 'Ön lob ve kısa süreli hafıza kapasiten muazzam seviyede. Merkezi sinir sistemin tamamen dinlenmiş ve yüksek bilişsel performansa hazır.';
             } else if (score === 4) {
                 statusClass = 'normal'; statusText = 'Sınırda Bellek Performansı 🟡';
                 recText = 'Hafıza span değerin standart sınırlarda. Hafif uykusuzluk veya zihinsel yorgunluk belirtileri olabilir. Dinlenmeye özen göster.';
