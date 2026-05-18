@@ -72,6 +72,7 @@
                 <button id="btn-select-cps" class="test-tab">CPS (Hız)</button>
                 <button id="btn-select-aim" class="test-tab">AIM (Hız+İsabet)</button>
                 <button id="btn-select-stroop" class="test-tab">Stroop (Bilişsel)</button>
+                <button id="btn-select-corsi" class="test-tab">Corsi (Hafıza)</button>
             </div>
 
             <div class="glass-card text-center mt-l">
@@ -88,6 +89,10 @@
                 </div>
                 
                 <div class="action-area">
+                    <div id="corsi-mode-selector-container" class="hidden" style="margin-bottom: 1.5rem; display: flex; justify-content: center; gap: 10px;">
+                        <button id="btn-corsi-forward" class="btn-toggle active" style="flex:1; padding: 10px; font-size: 0.95rem; font-weight: 600; border-radius: 30px; border: 1px solid rgba(255,255,255,0.1); background: rgba(59, 130, 246, 0.2); color: white; cursor: pointer; transition: all 0.2s;">Düz Hafıza</button>
+                        <button id="btn-corsi-backward" class="btn-toggle" style="flex:1; padding: 10px; font-size: 0.95rem; font-weight: 600; border-radius: 30px; border: 1px solid rgba(255,255,255,0.1); background: transparent; color: var(--text-muted); cursor: pointer; transition: all 0.2s;">Tersten Hafıza</button>
+                    </div>
                     <p id="dashboard-instruction" class="instruction-text">Rastgele yanan ışığa en hızlı şekilde tepki ver.</p>
                     <button id="btn-start-test" class="btn giant pulse-anim">Teste Başla</button>
                 </div>
@@ -174,6 +179,35 @@
             </div>
         </section>
 
+        <!-- CORSI SCREEN -->
+        <section id="screen-corsi" class="screen hidden">
+            <div class="test-header text-center glass-card" style="margin-bottom: 20px; padding: 15px;">
+                <h2 id="corsi-title" style="margin: 0 0 5px 0;">Corsi Hafıza Testi</h2>
+                <div style="display:flex; justify-content: space-between; align-items:center; margin-top:10px; font-size: 1rem; font-weight: 600;">
+                    <div id="corsi-mode-indicator" style="color: var(--accent-primary);">Mod: Düz</div>
+                    <div id="corsi-status-badge" class="corsi-badge watching">İZLE</div>
+                    <div>Dizi: <span id="corsi-length" style="color: var(--success);">3</span></div>
+                </div>
+            </div>
+            
+            <div id="corsi-arena" style="flex:1; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:20px; position:relative; overflow:hidden; border-radius: 24px; border: 2px solid rgba(255,255,255,0.05); background: rgba(0,0,0,0.3); box-shadow: inset 0 0 30px rgba(0,0,0,0.5); padding: 20px; touch-action:none;">
+                
+                <button id="corsi-start-btn" class="btn giant pulse-anim" style="position:absolute; top:50%; left:50%; transform:translate(-50%,-50%); z-index:5;">BAŞLA</button>
+                
+                <div id="corsi-grid-container" class="corsi-grid" style="display:none;">
+                    <button class="corsi-cell" data-index="0"></button>
+                    <button class="corsi-cell" data-index="1"></button>
+                    <button class="corsi-cell" data-index="2"></button>
+                    <button class="corsi-cell" data-index="3"></button>
+                    <button class="corsi-cell" data-index="4"></button>
+                    <button class="corsi-cell" data-index="5"></button>
+                    <button class="corsi-cell" data-index="6"></button>
+                    <button class="corsi-cell" data-index="7"></button>
+                    <button class="corsi-cell" data-index="8"></button>
+                </div>
+            </div>
+        </section>
+
         <!-- RESULT SCREEN -->
         <section id="screen-result" class="screen hidden">
             <div class="glass-card text-center">
@@ -208,6 +242,8 @@
                         <option value="cps">CPS (Tıklama Hızı)</option>
                         <option value="aim">AIM (Hız+İsabet)</option>
                         <option value="stroop">Stroop (Bilişsel)</option>
+                        <option value="corsi_forward">Corsi (Düz Hafıza)</option>
+                        <option value="corsi_backward">Corsi (Tersten Hafıza)</option>
                     </select>
                     <select id="chart-time-filter" style="flex:1;">
                         <option value="10">Son 10</option>
@@ -234,6 +270,8 @@
                 <button id="lb-tab-cps" class="test-tab">CPS</button>
                 <button id="lb-tab-aim" class="test-tab">AIM</button>
                 <button id="lb-tab-stroop" class="test-tab">Stroop</button>
+                <button id="lb-tab-corsi-forward" class="test-tab">Corsi Düz</button>
+                <button id="lb-tab-corsi-backward" class="test-tab">Corsi Ters</button>
             </div>
 
             <div class="glass-card mt-l" style="padding: 1rem; flex:1; display:flex; flex-direction:column; overflow:hidden;">

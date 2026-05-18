@@ -6,6 +6,7 @@ const screens = {
     pvt: document.getElementById('screen-pvt'),
     aim: document.getElementById('screen-aim'),
     stroop: document.getElementById('screen-stroop'),
+    corsi: document.getElementById('screen-corsi'),
     result: document.getElementById('screen-result'),
     chart: document.getElementById('screen-chart'),
     leaderboard: document.getElementById('screen-leaderboard')
@@ -35,6 +36,7 @@ const btnSelectCps = document.getElementById('btn-select-cps');
 const btnSelectPvt = document.getElementById('btn-select-pvt');
 const btnSelectAim = document.getElementById('btn-select-aim');
 const btnSelectStroop = document.getElementById('btn-select-stroop');
+const btnSelectCorsi = document.getElementById('btn-select-corsi');
 const dashboardTestTitle = document.getElementById('dashboard-test-title');
 const dashboardInstruction = document.getElementById('dashboard-instruction');
 
@@ -87,9 +89,24 @@ const lbTabPvt = document.getElementById('lb-tab-pvt');
 const lbTabCps = document.getElementById('lb-tab-cps');
 const lbTabAim = document.getElementById('lb-tab-aim');
 const lbTabStroop = document.getElementById('lb-tab-stroop');
+const lbTabCorsiForward = document.getElementById('lb-tab-corsi-forward');
+const lbTabCorsiBackward = document.getElementById('lb-tab-corsi-backward');
 const lbLoading = document.getElementById('lb-loading');
 const leaderboardList = document.getElementById('leaderboard-list');
 const btnAdminReset = document.getElementById('btn-admin-reset');
+
+// Corsi Elements
+const corsiModeSelectorContainer = document.getElementById('corsi-mode-selector-container');
+const btnCorsiForward = document.getElementById('btn-corsi-forward');
+const btnCorsiBackward = document.getElementById('btn-corsi-backward');
+const corsiTitle = document.getElementById('corsi-title');
+const corsiModeIndicator = document.getElementById('corsi-mode-indicator');
+const corsiStatusBadge = document.getElementById('corsi-status-badge');
+const corsiLengthDisplay = document.getElementById('corsi-length');
+const corsiArena = document.getElementById('corsi-arena');
+const corsiStartBtn = document.getElementById('corsi-start-btn');
+const corsiGridContainer = document.getElementById('corsi-grid-container');
+const corsiCells = document.querySelectorAll('.corsi-cell');
 
 // Constants
 const JSONBLOB_URL = 'https://api.restful-api.dev/objects/ff8081819d82fab6019e34be3fe44891';
@@ -106,6 +123,7 @@ let cpsState = { isActive: false, clicks: 0, timeLeft: 5.0, timer: null };
 let pvtState = { isActive: false, attempt: 1, maxAttempts: 3, results: [], timerStart: 0, timeoutId: null, status: 'idle' };
 let aimState = { isActive: false, targetsHit: 0, targetsMissed: 0, bombsHit: 0, proMode: false, totalTargets: 10, times: [], lastSpawnTime: 0 };
 let stroopState = { isActive: false, currentRound: 0, totalRounds: 20, times: [], errors: 0, startTime: 0, targetColor: '' };
+let corsiState = { isActive: false, mode: 'forward', sequence: [], userSequence: [], currentStep: 0, sequenceLength: 3, isDisplaying: false, lastSuccessLength: 0, timeoutIds: [] };
 
 const CPS_DURATION = 5.0;
 
@@ -180,6 +198,21 @@ function setupEventListeners() {
     btnSelectPvt.addEventListener('click', () => setTestMode('pvt'));
     btnSelectAim.addEventListener('click', () => setTestMode('aim'));
     btnSelectStroop.addEventListener('click', () => setTestMode('stroop'));
+    btnSelectCorsi.addEventListener('click', () => setTestMode('corsi'));
+
+    btnCorsiForward.addEventListener('click', () => {
+        corsiState.mode = 'forward';
+        btnCorsiForward.classList.add('active');
+        btnCorsiBackward.classList.remove('active');
+        setTestMode('corsi');
+    });
+
+    btnCorsiBackward.addEventListener('click', () => {
+        corsiState.mode = 'backward';
+        btnCorsiBackward.classList.add('active');
+        btnCorsiForward.classList.remove('active');
+        setTestMode('corsi');
+    });
 
     btnStartTest.addEventListener('click', () => {
         if (appState.activeTestMode === 'cps') {
@@ -191,10 +224,26 @@ function setupEventListeners() {
         } else if (appState.activeTestMode === 'stroop') {
             prepareStroopTest();
             showScreen('stroop');
+        } else if (appState.activeTestMode === 'corsi') {
+            prepareCorsiTest();
+            showScreen('corsi');
         } else {
             preparePvtTest();
             showScreen('pvt');
         }
+    });
+
+    corsiStartBtn.addEventListener('click', startCorsiTest);
+    corsiCells.forEach(cell => {
+        cell.addEventListener('mousedown', (e) => {
+            const index = parseInt(cell.getAttribute('data-index'));
+            handleCorsiCellClick(e, index);
+        });
+        cell.addEventListener('touchstart', (e) => {
+            e.preventDefault();
+            const index = parseInt(cell.getAttribute('data-index'));
+            handleCorsiCellClick(e, index);
+        }, { passive: false });
     });
 
     clickArea.addEventListener('mousedown', handleCpsClick);
@@ -238,6 +287,8 @@ function setupEventListeners() {
     lbTabCps.addEventListener('click', () => setLbTab('cps'));
     lbTabAim.addEventListener('click', () => setLbTab('aim'));
     lbTabStroop.addEventListener('click', () => setLbTab('stroop'));
+    lbTabCorsiForward.addEventListener('click', () => setLbTab('corsi_forward'));
+    lbTabCorsiBackward.addEventListener('click', () => setLbTab('corsi_backward'));
 
     btnAdminReset.addEventListener('click', async () => {
         const pass = prompt("Yönetici Şifresi:");
@@ -270,6 +321,8 @@ function setLbTab(mode) {
     lbTabCps.classList.toggle('active', mode === 'cps');
     lbTabAim.classList.toggle('active', mode === 'aim');
     lbTabStroop.classList.toggle('active', mode === 'stroop');
+    lbTabCorsiForward.classList.toggle('active', mode === 'corsi_forward');
+    lbTabCorsiBackward.classList.toggle('active', mode === 'corsi_backward');
     fetchAndRenderLeaderboard(mode);
 }
 
@@ -281,6 +334,13 @@ function setTestMode(mode) {
     btnSelectPvt.classList.toggle('active', mode === 'pvt');
     btnSelectAim.classList.toggle('active', mode === 'aim');
     btnSelectStroop.classList.toggle('active', mode === 'stroop');
+    btnSelectCorsi.classList.toggle('active', mode === 'corsi');
+    
+    if (mode === 'corsi') {
+        corsiModeSelectorContainer.classList.remove('hidden');
+    } else {
+        corsiModeSelectorContainer.classList.add('hidden');
+    }
     
     if (mode === 'cps') {
         dashboardTestTitle.textContent = "CPS Testi";
@@ -291,6 +351,13 @@ function setTestMode(mode) {
     } else if (mode === 'stroop') {
         dashboardTestTitle.textContent = "Stroop Testi";
         dashboardInstruction.textContent = "Ekranda yazan kelimeyi DEĞİL, kelimenin RENGİNİ hızlıca seç.";
+    } else if (mode === 'corsi') {
+        dashboardTestTitle.textContent = "Corsi (Hafıza) Testi";
+        if (corsiState.mode === 'backward') {
+            dashboardInstruction.textContent = "Karelerin yanış sırasını aklında tut ve TERSTEN (sondan başa) doğru tıkla.";
+        } else {
+            dashboardInstruction.textContent = "Karelerin yanış sırasını aklında tut ve AYNI SIRAYLA tıkla.";
+        }
     } else {
         dashboardTestTitle.textContent = "PVT Testi";
         dashboardInstruction.textContent = "Rastgele yanan ışığa en hızlı şekilde tepki ver. (Altın Standart)";
@@ -582,6 +649,151 @@ function endStroopTest() {
     processResult(finalScore, 'stroop');
 }
 
+// ---------------- CORSI TEST LOGIC ----------------
+function prepareCorsiTest() {
+    if (corsiState.timeoutIds) {
+        corsiState.timeoutIds.forEach(id => clearTimeout(id));
+    }
+    
+    corsiState = { 
+        isActive: false, 
+        mode: corsiState.mode || 'forward', 
+        sequence: [], 
+        userSequence: [], 
+        currentStep: 0, 
+        sequenceLength: 3, 
+        isDisplaying: false, 
+        lastSuccessLength: 0,
+        timeoutIds: []
+    };
+    
+    corsiLengthDisplay.textContent = "3";
+    corsiModeIndicator.textContent = `Mod: ${corsiState.mode === 'backward' ? 'Tersten' : 'Düz'}`;
+    corsiStatusBadge.className = "corsi-badge watching";
+    corsiStatusBadge.textContent = "İZLE";
+    
+    corsiGridContainer.style.display = 'none';
+    corsiStartBtn.style.display = 'block';
+    
+    corsiCells.forEach(cell => {
+        cell.className = 'corsi-cell';
+    });
+}
+
+function startCorsiTest() {
+    corsiState.isActive = true;
+    corsiStartBtn.style.display = 'none';
+    corsiGridContainer.style.display = 'grid';
+    generateNextCorsiRound();
+}
+
+function generateNextCorsiRound() {
+    corsiState.userSequence = [];
+    corsiState.currentStep = 0;
+    corsiLengthDisplay.textContent = corsiState.sequenceLength;
+    
+    corsiState.sequence = [];
+    for (let i = 0; i < corsiState.sequenceLength; i++) {
+        const randIndex = Math.floor(Math.random() * 9);
+        corsiState.sequence.push(randIndex);
+    }
+    
+    playCorsiSequence();
+}
+
+function playCorsiSequence() {
+    corsiState.isDisplaying = true;
+    corsiStatusBadge.className = "corsi-badge watching";
+    corsiStatusBadge.textContent = "İZLE";
+    
+    corsiCells.forEach(cell => cell.style.pointerEvents = 'none');
+    
+    let delay = 600;
+    corsiState.sequence.forEach((cellIndex, index) => {
+        let t1 = setTimeout(() => {
+            const cell = corsiCells[cellIndex];
+            cell.classList.add('flash-active', corsiState.mode === 'backward' ? 'flash-backward' : 'flash-forward');
+        }, delay);
+        corsiState.timeoutIds.push(t1);
+        
+        delay += 600;
+        
+        let t2 = setTimeout(() => {
+            const cell = corsiCells[cellIndex];
+            cell.classList.remove('flash-active', 'flash-backward', 'flash-forward');
+        }, delay);
+        corsiState.timeoutIds.push(t2);
+        
+        delay += 300;
+    });
+    
+    let t3 = setTimeout(() => {
+        corsiState.isDisplaying = false;
+        corsiStatusBadge.className = "corsi-badge repeating";
+        corsiStatusBadge.textContent = "SENDE";
+        corsiCells.forEach(cell => cell.style.pointerEvents = 'auto');
+    }, delay - 200);
+    corsiState.timeoutIds.push(t3);
+}
+
+function handleCorsiCellClick(e, index) {
+    if (!corsiState.isActive || corsiState.isDisplaying) return;
+    
+    createRipple(e, corsiArena, corsiState.mode === 'backward' ? 280 : 190);
+    
+    const cell = corsiCells[index];
+    
+    let expectedIndex;
+    if (corsiState.mode === 'forward') {
+        expectedIndex = corsiState.sequence[corsiState.currentStep];
+    } else {
+        expectedIndex = corsiState.sequence[corsiState.sequence.length - 1 - corsiState.currentStep];
+    }
+    
+    if (index === expectedIndex) {
+        corsiState.userSequence.push(index);
+        corsiState.currentStep++;
+        
+        cell.classList.add('flash-success');
+        setTimeout(() => cell.classList.remove('flash-success'), 200);
+        
+        if (corsiState.currentStep === corsiState.sequenceLength) {
+            corsiState.lastSuccessLength = corsiState.sequenceLength;
+            corsiState.sequenceLength++;
+            
+            corsiState.isDisplaying = true;
+            corsiStatusBadge.className = "corsi-badge";
+            corsiStatusBadge.textContent = "TEBRİKLER!";
+            
+            setTimeout(() => {
+                generateNextCorsiRound();
+            }, 1000);
+        }
+    } else {
+        corsiState.isActive = false;
+        corsiState.isDisplaying = true;
+        
+        cell.classList.add('flash-error');
+        
+        if (navigator.vibrate) navigator.vibrate([150, 100, 150]);
+        
+        corsiStatusBadge.className = "corsi-badge";
+        corsiStatusBadge.textContent = "ELENDİN!";
+        
+        setTimeout(() => {
+            cell.classList.remove('flash-error');
+            endCorsiTest();
+        }, 1200);
+    }
+}
+
+function endCorsiTest() {
+    corsiState.timeoutIds.forEach(id => clearTimeout(id));
+    corsiState.isActive = false;
+    corsiState.isDisplaying = false;
+    processResult(corsiState.lastSuccessLength, corsiState.mode === 'backward' ? 'corsi_backward' : 'corsi_forward');
+}
+
 // ---------------- COMMON LOGIC ----------------
 function createRipple(e, container, hue) {
     const rect = container.getBoundingClientRect();
@@ -618,7 +830,34 @@ function calculateCpsBaseline() {
 function processResult(score, type) {
     let statusClass = '', statusText = '', recText = '';
 
-    if (type === 'cps') {
+    if (type === 'corsi_forward' || type === 'corsi_backward') {
+        const isBack = type === 'corsi_backward';
+        if (isBack) {
+            if (score >= 5) {
+                statusClass = 'good'; statusText = 'Muazzam Prefrontal Korteks! 🟢';
+                recText = 'Zihinsel çevirme ve prefrontal korteks işlemci performansın kusursuz! Yüksek bilişsel yük altında bile muazzam bir odak ve çalışma belleğine sahipsin.';
+            } else if (score >= 3) {
+                statusClass = 'normal'; statusText = 'Standart Bilişsel Performans 🟡';
+                recText = 'Çalışma belleği çevirme kapasiten normal seviyede. Bilişsel tork standart sınırlar içerisinde işliyor.';
+            } else {
+                statusClass = 'fatigued'; statusText = 'AŞIRI BİLİŞSEL YÜK / BİTKİNLİK! 🔴';
+                recText = 'Prefrontal korteks hafıza çevriminde yetersiz kalıyor. Ağır beyin sisi ve zihinsel bitkinlik yaşanıyor olabilir. CNS dinlenmeye muhtaç! 🚨';
+            }
+        } else {
+            if (score >= 5) {
+                statusClass = 'good'; statusText = 'Harika Hafıza Torku! 🟢';
+                recText = 'Ön lob ve kısa süreli hafıza torkun muazzam seviyede. Merkezi sinir sistemin tamamen dinlenmiş ve yüksek bilişsel performansa hazır.';
+            } else if (score === 4) {
+                statusClass = 'normal'; statusText = 'Sınırda Bellek Performansı 🟡';
+                recText = 'Hafıza span değerin standart sınırlarda. Hafif uykusuzluk veya zihinsel yorgunluk belirtileri olabilir. Dinlenmeye özen göster.';
+            } else {
+                statusClass = 'fatigued'; statusText = 'NÖROLOJİK ALARM! 🔴';
+                recText = 'Corsi Span skorun kritik seviyenin altında (&lt;4). Bu durum yüksek ihtimalle <strong>nörolojik yorgunluk, ciddi uykusuzluk veya B12/demir eksikliği</strong> belirtisidir. Acilen dinlenmeli ve beslenmene dikkat etmelisin! 🚨';
+            }
+        }
+        resultScoreValue.textContent = Math.round(score);
+        resultScoreUnit.textContent = 'Kare';
+    } else if (type === 'cps') {
         const ratio = score / calculateCpsBaseline();
         if (ratio >= 0.95) {
             statusClass = 'good'; statusText = 'Harika Durumda! 🟢';
@@ -720,7 +959,11 @@ function processResult(score, type) {
 
 function updateDashboard() {
     const type = appState.activeTestMode;
-    const history = appState.history.filter(h => h.type === type);
+    let displayHistoryType = type;
+    if (type === 'corsi') {
+        displayHistoryType = corsiState.mode === 'backward' ? 'corsi_backward' : 'corsi_forward';
+    }
+    const history = appState.history.filter(h => h.type === displayHistoryType);
     
     if (type === 'cps') {
         statBaseline.textContent = calculateCpsBaseline().toFixed(1);
@@ -734,6 +977,10 @@ function updateDashboard() {
     } else if (type === 'stroop') {
         statBaseline.textContent = '> 2500';
         statLast.textContent = history.length > 0 ? Math.round(history[0].score) : '--';
+    } else if (type === 'corsi') {
+        const isBack = corsiState.mode === 'backward';
+        statBaseline.textContent = isBack ? '>= 4 Kare' : '>= 5 Kare';
+        statLast.textContent = history.length > 0 ? Math.round(history[0].score) + ' Kare' : '--';
     }
 
     historyList.innerHTML = '';
@@ -745,12 +992,14 @@ function updateDashboard() {
     history.forEach(item => {
         const d = new Date(item.date);
         const dateStr = `${d.getDate().toString().padStart(2,'0')}/${(d.getMonth()+1).toString().padStart(2,'0')} ${d.getHours().toString().padStart(2,'0')}:${d.getMinutes().toString().padStart(2,'0')}`;
+        
         let valStr = `${Math.round(item.score)} Puan`;
-        if (type === 'cps') valStr = `${item.score.toFixed(1)} CPS`;
-        else if (type === 'pvt') valStr = `${Math.round(item.score)} ms`;
+        if (item.type === 'cps') valStr = `${item.score.toFixed(1)} CPS`;
+        else if (item.type === 'pvt') valStr = `${Math.round(item.score)} ms`;
+        else if (item.type === 'corsi_forward' || item.type === 'corsi_backward') valStr = `${Math.round(item.score)} Kare`;
         
         let labelAdd = '';
-        if (type === 'aim' && item.proMode) labelAdd = ' <span style="font-size:0.6rem; color:var(--danger); border:1px solid var(--danger); border-radius:4px; padding:1px 3px; vertical-align:middle; margin-left:4px;">PRO</span>';
+        if (item.type === 'aim' && item.proMode) labelAdd = ' <span style="font-size:0.6rem; color:var(--danger); border:1px solid var(--danger); border-radius:4px; padding:1px 3px; vertical-align:middle; margin-left:4px;">PRO</span>';
 
         const li = document.createElement('li');
         li.className = 'history-item';
@@ -759,7 +1008,6 @@ function updateDashboard() {
     });
 }
 
-// ---------------- CHART LOGIC ----------------
 function renderChart() {
     const type = chartTypeFilter.value, limit = chartTimeFilter.value;
     let dataList = appState.history.filter(h => h.type === type).reverse();
@@ -786,6 +1034,21 @@ function renderChart() {
         gradientStart = 'rgba(16, 185, 129, 0.5)';
         chartLabel = 'AIM Puanı';
         unit = ' Puan';
+    } else if (type === 'stroop') {
+        lineColor = '#eab308';
+        gradientStart = 'rgba(234, 179, 8, 0.5)';
+        chartLabel = 'Stroop Puanı';
+        unit = ' Puan';
+    } else if (type === 'corsi_forward') {
+        lineColor = '#06b6d4';
+        gradientStart = 'rgba(6, 182, 212, 0.5)';
+        chartLabel = 'Düz Corsi Span';
+        unit = ' Kare';
+    } else if (type === 'corsi_backward') {
+        lineColor = '#a855f7';
+        gradientStart = 'rgba(168, 85, 247, 0.5)';
+        chartLabel = 'Ters Corsi Span';
+        unit = ' Kare';
     }
     
     const gradient = ctx.createLinearGradient(0, 0, 0, 400);
@@ -822,13 +1085,15 @@ async function syncLeaderboard(score, type, username) {
         
         if (!data.aim) data.aim = [];
         if (!data.stroop) data.stroop = [];
+        if (!data.corsi_forward) data.corsi_forward = [];
+        if (!data.corsi_backward) data.corsi_backward = [];
         
         const i = data[type].findIndex(u => u.username === username);
         let updated = false;
         
         if (i > -1) {
             const old = data[type][i].score;
-            if ((type === 'pvt' && score < old) || (type === 'aim' && score > old) || (type === 'cps' && score > old) || (type === 'stroop' && score > old)) {
+            if ((type === 'pvt' && score < old) || (type === 'aim' && score > old) || (type === 'cps' && score > old) || (type === 'stroop' && score > old) || (type === 'corsi_forward' && score > old) || (type === 'corsi_backward' && score > old)) {
                 data[type][i].score = score;
                 data[type][i].date = new Date().toISOString();
                 updated = true;
@@ -889,12 +1154,15 @@ async function fetchAndRenderLeaderboard(type) {
             let valStr = `${Math.round(item.score)} Puan`;
             if (type === 'cps') valStr = `${item.score.toFixed(1)} CPS`;
             else if (type === 'pvt') valStr = `${Math.round(item.score)} ms`;
+            else if (type === 'corsi_forward' || type === 'corsi_backward') valStr = `${Math.round(item.score)} Kare`;
             
             // Aim colors: >=2500 good, <1500 bad
             let scoreClass = '';
             if (type === 'pvt') scoreClass = item.score > 400 ? 'score-fatigued' : (item.score <= 300 ? 'score-good' : '');
             else if (type === 'aim') scoreClass = item.score < 1500 ? 'score-fatigued' : (item.score >= 2500 ? 'score-good' : '');
             else if (type === 'stroop') scoreClass = item.score < 1500 ? 'score-fatigued' : (item.score >= 2500 ? 'score-good' : '');
+            else if (type === 'corsi_forward') scoreClass = item.score < 4 ? 'score-fatigued' : (item.score >= 5 ? 'score-good' : 'score-normal');
+            else if (type === 'corsi_backward') scoreClass = item.score < 3 ? 'score-fatigued' : (item.score >= 5 ? 'score-good' : 'score-normal');
             
             li.innerHTML = `
                 <div style="display:flex; align-items:center; gap: 10px;">

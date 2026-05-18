@@ -60,3 +60,35 @@ B) Skor 1500 - 2500 Arası:
 C) Skor 1500'in Altında:
    Başlık: Ağır Beyin Sisi 🔴
    Metin:  Ağır BEYİN SİSİ tespit edildi. Frontal lob kelime/renk çelişkisini çözmekte çok yavaş kalıyor veya çok fazla hata yapıyor. CNS çok yorgun.
+
+
+5. Corsi (Hafıza Span) Testi Sonuçları
+-----------------------------------------
+
+STAGE 1: Düz Hafıza (Forward Corsi)
+A) Skor 5 Kare ve Üzeri:
+   Başlık: Harika Hafıza Torku! 🟢
+   Metin:  Ön lob ve kısa süreli hafıza torkun muazzam seviyede. Merkezi sinir sistemin tamamen dinlenmiş ve yüksek bilişsel performansa hazır.
+
+B) Skor 4 Kare:
+   Başlık: Sınırda Bellek Performansı 🟡
+   Metin:  Hafıza span değerin standart sınırlarda. Hafif uykusuzluk veya zihinsel yorgunluk belirtileri olabilir. Dinlenmeye özen göster.
+
+C) Skor 4 Karenin Altındaysa (< 4):
+   Başlık: NÖROLOJİK ALARM! 🔴
+   Metin:  Corsi Span skorun kritik seviyenin altında (<4). Bu durum yüksek ihtimalle nörolojik yorgunluk, ciddi uykusuzluk veya B12/demir eksikliği belirtisidir. Acilen dinlenmeli ve beslenmene dikkat etmelisin! 🚨
+
+
+STAGE 2: Tersten Hafıza (Backward Corsi - Bilişsel Yük)
+A) Skor 5 Kare ve Üzeri:
+   Başlık: Muazzam Prefrontal Korteks! 🟢
+   Metin:  Zihinsel çevirme ve prefrontal korteks işlemci performansın kusursuz! Yüksek bilişsel yük altında bile muazzam bir odak ve çalışma belleğine sahipsin.
+
+B) Skor 3 veya 4 Kare:
+   Başlık: Standart Bilişsel Performans 🟡
+   Metin:  Çalışma belleği çevirme kapasiten normal seviyede. Bilişsel tork standart sınırlar içerisinde işliyor.
+
+C) Skor 3 Karenin Altındaysa (< 3):
+   Başlık: AŞIRI BİLİŞSEL YÜK / BİTKİNLİK! 🔴
+   Metin:  Prefrontal korteks hafıza çevriminde yetersiz kalıyor. Ağır beyin sisi ve zihinsel bitkinlik yaşanıyor olabilir. CNS dinlenmeye muhtaç! 🚨
+
